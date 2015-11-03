@@ -102,6 +102,14 @@ class TestHourAngle(unittest.TestCase):
 		self.assertAlmostEqual(localSolarTime(dt, dst_on, longitude, stdmeridican), 9.23, delta=0.01)
 		self.assertAlmostEqual(hourAngle(dt, dst_on, longitude, stdmeridican)[DR.Degrees], 41.5, delta=0.1)
 
+	# test solar noon on standard meridian, should be zero right?
+	def test_solarNoon(self):
+		dt = datetime(2001, 6, 15, 12, 00, 00)  # chose June 15 because EOT goes to near zero on that date
+		dst_on = False
+		longitude = 90
+		stdmeridican = 90
+		self.assertAlmostEqual(hourAngle(dt, dst_on, longitude, stdmeridican)[DR.Degrees], 0, delta=0.1)
+
 class TestAltitudeAngle(unittest.TestCase):
 
 	# validation from example 6-2 of the 5th Edition of McQuiston
@@ -135,7 +143,7 @@ class TestWallAzimuthAngle(unittest.TestCase):
 		latitude = 40
 		wallnormal = 0 # south, degrees
 		solar_azimuth = solarAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude)[DR.Degrees]
-		self.assertAlmostEqual(wallSolarAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude, wallnormal)[DR.Degrees], solar_azimuth, delta=0.001)
+		self.assertAlmostEqual(wallAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude, wallnormal)[DR.Degrees], solar_azimuth, delta=0.001)
 
 class TestSolarAngleOfIncidence(unittest.TestCase):
 
@@ -147,9 +155,23 @@ class TestSolarAngleOfIncidence(unittest.TestCase):
 		stdmeridican = 90
 		latitude = 40
 		wallnormal = 0 # south, degrees
-		solar_azimuth = solarAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude)[DR.Degrees]
-		expected_theta = math.cos(math.radians(solar_azimuth)) * math.cos(altitudeAngle(
-		self.assertAlmostEqual(wallSolarAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude, wallnormal)[DR.Degrees], solar_azimuth, delta=0.001)
+		solar_azimuth = solarAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude)[DR.Radians]
+		expected_theta = math.acos(math.cos(solar_azimuth) * math.cos(altitudeAngle(dt, dst_on, longitude, stdmeridican, latitude)[DR.Radians]))
+		self.assertAlmostEqual(solarAngleOfIncidence(dt, dst_on, longitude, stdmeridican, latitude, wallnormal)[DR.Radians], expected_theta, delta=0.001)
+
+class TestRadiationOnSurface(unittest.TestCase):
+
+	def test_directRadiationOnSurfaceSouthFacing(self):
+		dt = datetime(2001, 7, 21, 10, 00, 00)
+		dst_on = True
+		longitude = 85
+		stdmeridican = 90
+		latitude = 40
+		wallnormal = 0 # south, degrees
+		theta = solarAngleOfIncidence(dt, dst_on, longitude, stdmeridican, latitude, wallnormal)[DR.Radians]
+		insolation = 293 # watts
+		self.assertAlmostEqual(directRadiationOnSurface(dt, dst_on, longitude, stdmeridican, latitude, wallnormal, insolation), insolation * math.cos(theta), delta=0.1)
+		
 
 # allow execution directly as python tests/test_solar.py
 if __name__ == '__main__':
