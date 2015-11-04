@@ -172,7 +172,7 @@ def wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMer
 	:param longitude: [Float] [degrees west] The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
 	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
 	:param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
-	:param surfaceAzimuthDeg: [Float] [degrees CW from South] The angle between south and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 45, northwest facing surface: 135)
+	:param surfaceAzimuthDeg: [Float] [degrees CW from North] The angle between north and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 225, northwest facing surface: 315)
 
 	:returns: [Dictionary {DR, Float}] The wall azimuth angle in a dictionary providing both radian and degree versions.  NOTE: If the sun is behind the surface, the Float values in the dictionary are None.
 
@@ -188,7 +188,6 @@ def wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMer
 	wallAzimuthRadians = math.radians(wallAzimuthDegrees)
 	return {DR.Degrees: wallAzimuthDegrees, DR.Radians: wallAzimuthRadians}
 
-
 def solarAngleOfIncidence(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg):
 	"""
 	Calculates the solar angle of incidence for a given set of time and location conditions, and a surface orientation. The solar angle of incidence is the angle between the solar ray vector incident on the surface, and the outward facing surface normal vector.
@@ -198,13 +197,16 @@ def solarAngleOfIncidence(datetimeInstance, daylightSavingsOn, longitude, standa
 	:param longitude: [Float] [degrees west] The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
 	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
 	:param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
-	:param surfaceAzimuthDeg: [Float] [degrees CW from South] The angle between south and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 45, northwest facing surface: 135)
+	:param surfaceAzimuthDeg: [Float] [degrees CW from North] The angle between north and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 225, northwest facing surface: 315)
 
-	:returns: [Dictionary {DR, Float}] The solar angle of incidence in a dictionary providing both radian and degree versions
+	:returns: [Dictionary {DR, Float}] The solar angle of incidence in a dictionary providing both radian and degree versions.  NOTE: If the sun is down, or behind the surface, the Float values in the dictionary are None.
 
 	"""
-	solarAzimuthRadiansAbsolute = abs(wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg)[DR.Radians])
-	azimuthAngleRadians = math.acos( math.cos(altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude)[DR.Radians]) * math.cos(solarAzimuthRadiansAbsolute) )
+	wallAzimuthRad = wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg)[DR.Radians]
+	if wallAzimuthRad is None:
+		return {DR.Degrees: None, DR.Radians: None}
+	altitudeRad = altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude)[DR.Radians]
+	azimuthAngleRadians = math.acos( math.cos(altitudeRad) * math.cos(wallAzimuthRad) )
 	azimuthAngleDegrees = math.degrees(azimuthAngleRadians)
 	return {DR.Degrees: azimuthAngleDegrees, DR.Radians: azimuthAngleRadians}
 
@@ -217,7 +219,7 @@ def directRadiationOnSurface(datetimeInstance, daylightSavingsOn, longitude, sta
 	:param longitude: [Float] [degrees west] The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
 	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
 	:param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
-	:param surfaceAzimuthDeg: [Float] [degrees CW from South] The angle between south and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 45, northwest facing surface: 135)
+	:param surfaceAzimuthDeg: [Float] [degrees CW from North] The angle between north and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 225, northwest facing surface: 315)
 	:param horizontalDirectIrradiation: [Float] [any] The global horizontal direct irradiation at the location.
 
 	:returns: [Dictionary {DR, Float}] The incident direct radiation on the surface.  The units of this return value match the units of the parameter :horizontalDirectIrradiation:

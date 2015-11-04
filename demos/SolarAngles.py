@@ -144,3 +144,34 @@ plt.ylabel("Angle [degrees]")
 plt.grid(True, axis='both')
 plt.legend()
 plt.savefig(os.path.join(os.path.dirname(__file__), '..', '..', 'SolarCalculations.wiki/DemoSolarAnglesWallAzimuths.png'))
+
+### reset
+plt.close()
+
+# calculate solar angle of incidence for a summer day in Golden, CO
+longitude = 105.2
+stdmeridian = 105
+latitude = 39.75
+x = []
+east_wall_normal_from_north = 90
+east_theta = []
+east_az = []
+alt = []
+for hour in range(0,24): # gives zero-based hours as expected in the datetime constructor
+	x.append(hour)
+	dt = datetime(2001, 6, 21, hour, 00, 00)
+	east_az.append(solar.wallAzimuthAngle(dt, True, longitude, stdmeridian, latitude, east_wall_normal_from_north)[solar.DR.Degrees])
+	east_theta.append(solar.solarAngleOfIncidence(dt, True, longitude, stdmeridian, latitude, east_wall_normal_from_north)[solar.DR.Degrees])
+	alt.append(solar.altitudeAngle(dt, True, longitude, stdmeridian, latitude)[solar.DR.Degrees])
+
+plt.plot(x, alt,        'r', label='Solar Altitude Angle')
+plt.plot(x, east_az,    'g', label='East Wall Azimuth Angle')
+plt.plot(x, east_theta, 'b', label='East Wall Incidence Angle')
+plt.xlim([0,23])
+plt.ylim([-90,180])
+plt.suptitle("Wall Solar Incidence Angles", fontsize=14, fontweight='bold')
+plt.xlabel("Hour of Day -- Clock Time")
+plt.ylabel("Angle [degrees]")
+plt.grid(True, axis='both')
+plt.legend()
+plt.savefig(os.path.join(os.path.dirname(__file__), '..', '..', 'SolarCalculations.wiki/DemoSolarAnglesSolarIncidence.png'))
