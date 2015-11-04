@@ -98,7 +98,7 @@ def localSolarTime(datetimeInstance, daylightSavingsOn, longitude, standardMerid
 
 def hourAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian):
 	"""
-	Calculates the current hour angle for a given set of time and location conditions. The hour angle is the angle between solar noon and the current solar angle, so at local solar noon the value is zero, and at sunrise/sunset, the value maximizes.
+	Calculates the current hour angle for a given set of time and location conditions. The hour angle is the angle between solar noon and the current solar angle, so at local solar noon the value is zero, in the morning it is below zero, and in the afternoon it is positive.
 
 	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
 	:param daylightSavingsOn: [Boolean] A flag if the current time is a daylight savings number.  If True, the hour is decremented.
@@ -109,7 +109,7 @@ def hourAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian):
 
 	"""
 	localSolarTimeHours = localSolarTime(datetimeInstance, daylightSavingsOn, longitude, standardMeridian)
-	hourAngleDeg = abs(15.0 * (localSolarTimeHours - 12))
+	hourAngleDeg = 15.0 * (localSolarTimeHours - 12)
 	hourAngleRad = math.radians(hourAngleDeg)
 	return {DR.Degrees: hourAngleDeg, DR.Radians: hourAngleRad}
 
@@ -135,7 +135,7 @@ def altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridi
 
 def solarAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude):
 	"""
-	Calculates the current solar azimuth angle for a given set of time and location conditions. The solar azimuth angle is the angle in the horizontal plane between due south and the sun.
+	Calculates the current solar azimuth angle for a given set of time and location conditions. The solar azimuth angle is the angle in the horizontal plane between due north and the sun.  It is measured clockwise, so that east is +90 degrees and west is +270 degrees.
 
 	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
 	:param daylightSavingsOn: [Boolean] A flag if the current time is a daylight savings number.  If True, the hour is decremented.
@@ -147,9 +147,19 @@ def solarAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMe
 
 	"""
 	declinRadians = declinationAngle(datetimeInstance)[DR.Radians]
-	altitudeRadians = altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude)[DR.Radians]
+	altitudeDegrees = altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude)[DR.Degrees]
+	altitudeRadians = math.radians(altitudeDegrees)
+	if altitudeDegrees < 0: # sun is down
+		return {DR.Degrees: 0, DR.Radians: 0}
+	zenithRadians = math.radians(90-altitudeDegrees)
 	latitudeRad = math.radians(latitude)
-	azimuthAngleRadians = math.acos( ( math.sin(altitudeRadians) * math.sin(latitudeRad) - math.sin(declinRadians) ) / ( math.cos(altitudeRadians) * math.cos(latitudeRad)) )
+	hourRad = hourAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian)[DR.Radians]
+	arccosineFromSouth = math.acos( ( math.sin(altitudeRadians) * math.sin(latitudeRad) - math.sin(declinRadians) ) / ( math.cos(altitudeRadians) * math.cos(latitudeRad)) )
+	if hourRad < 0:
+		azimuthFromSouth = arccosineFromSouth
+	else:
+		azimuthFromSouth = -arccosineFromSouth
+	azimuthAngleRadians = math.radians(180)-azimuthFromSouth
 	azimuthAngleDegrees = math.degrees(azimuthAngleRadians)
 	return {DR.Degrees: azimuthAngleDegrees, DR.Radians: azimuthAngleRadians}
 

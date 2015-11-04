@@ -100,7 +100,7 @@ class TestHourAngle(unittest.TestCase):
 		self.assertAlmostEqual(localCivilTime(dt, dst_on, longitude, stdmeridican), 9.3, delta=0.1)
 		self.assertAlmostEqual(equationOfTime(dt), -6.2, delta=0.2)
 		self.assertAlmostEqual(localSolarTime(dt, dst_on, longitude, stdmeridican), 9.23, delta=0.01)
-		self.assertAlmostEqual(hourAngle(dt, dst_on, longitude, stdmeridican)[DR.Degrees], 41.5, delta=0.1)
+		self.assertAlmostEqual(hourAngle(dt, dst_on, longitude, stdmeridican)[DR.Degrees], -41.5, delta=0.1) # we are using negative in the morning; positive in the afternoon
 
 	# test solar noon on standard meridian, should be zero right?
 	def test_solarNoon(self):
@@ -130,7 +130,9 @@ class TestAzimuthAngle(unittest.TestCase):
 		longitude = 85
 		stdmeridican = 90
 		latitude = 40
-		self.assertAlmostEqual(solarAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude)[DR.Degrees], 73.7, delta=0.1)
+		expectedAzimuthFromSouth = 73.7
+		expectedAzimuthFromNorth = 180 - expectedAzimuthFromSouth
+		self.assertAlmostEqual(solarAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude)[DR.Degrees], expectedAzimuthFromNorth, delta=0.1)
 
 class TestWallAzimuthAngle(unittest.TestCase):
 
@@ -171,7 +173,7 @@ class TestRadiationOnSurface(unittest.TestCase):
 		theta = solarAngleOfIncidence(dt, dst_on, longitude, stdmeridican, latitude, wallnormal)[DR.Radians]
 		insolation = 293 # watts
 		self.assertAlmostEqual(directRadiationOnSurface(dt, dst_on, longitude, stdmeridican, latitude, wallnormal, insolation), insolation * math.cos(theta), delta=0.1)
-		
+
 
 # allow execution directly as python tests/test_solar.py
 if __name__ == '__main__':
