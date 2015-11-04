@@ -112,3 +112,35 @@ plt.grid(True, axis='both')
 plt.legend()
 plt.savefig(os.path.join(os.path.dirname(__file__), '..', '..', 'SolarCalculations.wiki/DemoSolarAnglesSolarAzimuth.png'))
 
+### reset
+plt.close()
+
+# calculate wall azimuth angles for a summer day in Golden, CO
+longitude = 105.2
+stdmeridian = 105
+latitude = 39.75
+x = []
+east_wall_normal_from_north = 90
+east_az = []
+south_wall_normal_from_north = 180
+south_az = []
+west_wall_normal_from_north = 270
+west_az = []
+for hour in range(0,24): # gives zero-based hours as expected in the datetime constructor
+	x.append(hour)
+	dt = datetime(2001, 6, 21, hour, 00, 00)
+	east_az.append(solar.wallAzimuthAngle(dt, True, longitude, stdmeridian, latitude, east_wall_normal_from_north)[solar.DR.Degrees])
+	south_az.append(solar.wallAzimuthAngle(dt, True, longitude, stdmeridian, latitude, south_wall_normal_from_north)[solar.DR.Degrees])
+	west_az.append(solar.wallAzimuthAngle(dt, True, longitude, stdmeridian, latitude, west_wall_normal_from_north)[solar.DR.Degrees])
+
+plt.plot(x, east_az,  'r', label='East Wall Azimuth Angle')
+plt.plot(x, south_az, 'g', label='South Wall Azimuth Angle')
+plt.plot(x, west_az,  'b', label='West Wall Azimuth Angle')
+plt.xlim([0,23])
+plt.ylim([-90,180])
+plt.suptitle("Wall Azimuth Angles", fontsize=14, fontweight='bold')
+plt.xlabel("Hour of Day -- Clock Time")
+plt.ylabel("Angle [degrees]")
+plt.grid(True, axis='both')
+plt.legend()
+plt.savefig(os.path.join(os.path.dirname(__file__), '..', '..', 'SolarCalculations.wiki/DemoSolarAnglesWallAzimuths.png'))

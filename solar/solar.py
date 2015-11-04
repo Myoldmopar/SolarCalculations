@@ -143,14 +143,14 @@ def solarAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMe
 	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
 	:param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
 
-	:returns: [Dictionary {DR, Float}] The solar azimuth angle in a dictionary providing both radian and degree versions
+	:returns: [Dictionary {DR, Float}] The solar azimuth angle in a dictionary providing both radian and degree versions.  NOTE: If the sun is down, the Float values in the dictionary are None.
 
 	"""
 	declinRadians = declinationAngle(datetimeInstance)[DR.Radians]
 	altitudeDegrees = altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude)[DR.Degrees]
 	altitudeRadians = math.radians(altitudeDegrees)
 	if altitudeDegrees < 0: # sun is down
-		return {DR.Degrees: 0, DR.Radians: 0}
+		return {DR.Degrees: None, DR.Radians: None}
 	zenithRadians = math.radians(90-altitudeDegrees)
 	latitudeRad = math.radians(latitude)
 	hourRad = hourAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian)[DR.Radians]
@@ -174,25 +174,20 @@ def wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMer
 	:param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
 	:param surfaceAzimuthDeg: [Float] [degrees CW from South] The angle between south and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 45, northwest facing surface: 135)
 
-	:returns: [Dictionary {DR, Float}] The wall azimuth angle in a dictionary providing both radian and degree versions
+	:returns: [Dictionary {DR, Float}] The wall azimuth angle in a dictionary providing both radian and degree versions.  NOTE: If the sun is behind the surface, the Float values in the dictionary are None.
 
 	"""
 	thisSurfaceAzimuthDeg = surfaceAzimuthDeg % 360
 	operator = 0
-	if localSolarTime(datetimeInstance, daylightSavingsOn, longitude, standardMeridian) < 12:
-		if surfaceAzimuthDeg > 180:
-			operator = -1  # morning, east facing walls
-		else:
-			operator = +1  # morning, west facing walls
-	else:
-		if surfaceAzimuthDeg > 180:
-			operator = +1  # afternoon, east facing walls
-		else:
-			operator = -1  # afternoon, west facing walls
 	solarAzimuth = solarAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude)[DR.Degrees]
-	wallAzimuthDegrees = solarAzimuth + operator * surfaceAzimuthDeg
+	if solarAzimuth is None: # sun is down
+		return {DR.Degrees: None, DR.Radians: None}
+	wallAzimuthDegrees = solarAzimuth - surfaceAzimuthDeg
+	if wallAzimuthDegrees > 90 or wallAzimuthDegrees < -90:
+		return {DR.Degrees: None, DR.Radians: None}
 	wallAzimuthRadians = math.radians(wallAzimuthDegrees)
 	return {DR.Degrees: wallAzimuthDegrees, DR.Radians: wallAzimuthRadians}
+
 
 def solarAngleOfIncidence(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg):
 	"""
