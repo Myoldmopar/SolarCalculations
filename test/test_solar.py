@@ -136,29 +136,32 @@ class TestAzimuthAngle(unittest.TestCase):
 
 class TestWallAzimuthAngle(unittest.TestCase):
 
-	# test a pure south facing surface; it should be equal to the plain solar azimuth as measured from south
-	def test_gammeSouthFacing(self):
+	# test east facing wall where the solar azimuth is known from a prior unit test
+	def test_gammaSouthFacing(self):
 		dt = datetime(2001, 7, 21, 10, 00, 00)
 		dst_on = True
 		longitude = 85
 		stdmeridican = 90
 		latitude = 40
-		wallnormal = 0 # south, degrees
-		solar_azimuth = solarAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude)[DR.Degrees]
-		self.assertAlmostEqual(wallAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude, wallnormal)[DR.Degrees], solar_azimuth, delta=0.001)
+		wallnormal = 90 # north, degrees
+		expected_solar_azimuth = 180-73.7
+		expected_wall_azimuth = expected_solar_azimuth - wallnormal
+		self.assertAlmostEqual(wallAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude, wallnormal)[DR.Degrees], expected_wall_azimuth, delta=0.1)
 
 class TestSolarAngleOfIncidence(unittest.TestCase):
 
-	# test a south facing surface; it should be calculable pretty easy
+	# test east facing surface where solar azimuth and altitude are known from prior unit tests
 	def test_thetaSouthFacing(self):
 		dt = datetime(2001, 7, 21, 10, 00, 00)
 		dst_on = True
 		longitude = 85
 		stdmeridican = 90
 		latitude = 40
-		wallnormal = 0 # south, degrees
-		solar_azimuth = solarAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude)[DR.Radians]
-		expected_theta = math.acos(math.cos(solar_azimuth) * math.cos(altitudeAngle(dt, dst_on, longitude, stdmeridican, latitude)[DR.Radians]))
+		wallnormal = 90 # south, degrees
+		expected_solar_azimuth = 180-73.7
+		expected_wall_azimuth = math.radians(expected_solar_azimuth - wallnormal)
+		expected_solar_altitude = math.radians(49.7)
+		expected_theta = math.acos(math.cos(expected_wall_azimuth) * math.cos(expected_solar_altitude))
 		self.assertAlmostEqual(solarAngleOfIncidence(dt, dst_on, longitude, stdmeridican, latitude, wallnormal)[DR.Radians], expected_theta, delta=0.001)
 
 class TestRadiationOnSurface(unittest.TestCase):
@@ -169,7 +172,7 @@ class TestRadiationOnSurface(unittest.TestCase):
 		longitude = 85
 		stdmeridican = 90
 		latitude = 40
-		wallnormal = 0 # south, degrees
+		wallnormal = 180 # south, degrees
 		theta = solarAngleOfIncidence(dt, dst_on, longitude, stdmeridican, latitude, wallnormal)[DR.Radians]
 		insolation = 293 # watts
 		self.assertAlmostEqual(directRadiationOnSurface(dt, dst_on, longitude, stdmeridican, latitude, wallnormal, insolation), insolation * math.cos(theta), delta=0.1)

@@ -225,4 +225,7 @@ def directRadiationOnSurface(datetimeInstance, daylightSavingsOn, longitude, sta
 	:returns: [Dictionary {DR, Float}] The incident direct radiation on the surface.  The units of this return value match the units of the parameter :horizontalDirectIrradiation:
 
 	"""
-	return horizontalDirectIrradiation * math.cos( solarAngleOfIncidence(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg)[DR.Radians] )
+	theta = solarAngleOfIncidence(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg)[DR.Radians]
+	if theta is None:
+		return None
+	return horizontalDirectIrradiation * math.cos( theta )
