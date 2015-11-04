@@ -23,27 +23,10 @@ class DR:
 
 def dayOfYear(datetimeInstance):
 	"""
-	#### Summary
+	Calculates the day of year (1-366) given a Python datetime.datetime instance.  Basically a wrapper around the native tm\_yday parameter to ensure it is a full datetime instance in subsequent calculations. If the type is *not* datetime.datetime, this will throw a TypeError
 
-	Calculates the day of year (1-366) given a Python datetime.datetime instance.
-
-	#### Description
-
-	Basically a wrapper around the native tm_yday parameter to ensure it is a full datetime instance in subsequent calculations.
-	If the type is _not_ datetime.datetime, this will throw a TypeError
-
-	#### Arguments:
-
-	* datetimeInstance
-		- Type: Python native datetime.datetime
-		- Description: The current date and time to be used in this calculation of day of year
-
-	#### Returns
-
-	* returnValue
-		- Type: Integer
-		- Description: The day of year, from 1 to 365 for non-leap years and 1-366 for leap years
-		- Units: -
+	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
+	:returns: [Integer] [dimensionless] The day of year, from 1 to 365 for non-leap years and 1-366 for leap years.
 
 	"""
 	if not type(datetimeInstance) is datetime:
@@ -54,28 +37,10 @@ def dayOfYear(datetimeInstance):
 
 def equationOfTime(datetimeInstance):
 	"""
+	Calculates the Equation of Time for a given date.  I wasn't able to get the McQuiston equation to match the values in the given table.  I ended up using a different formulation here: http://holbert.faculty.asu.edu/eee463/SolarCalcs.pdf.
 
-	#### Summary
-
-	Calculates the Equation of Time for a given date
-
-	#### Description
-
-	I wasn't able to get the McQuiston equation to match the values in the given table
-	I ended up using a different formulation here: http://holbert.faculty.asu.edu/eee463/SolarCalcs.pdf
-
-	#### Arguments:
-
-	* datetimeInstance
-		- Type: Python native datetime.datetime
-		- Description: The current date and time to be used in this calculation of day of year
-
-	#### Returns
-
-	* returnValue
-		- Type: Float
-		- Description: The equation of time, which is the difference between local civil time and local solar time
-		- Units: minutes
+	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
+	:returns: [Float] The equation of time, which is the difference between local civil time and local solar time
 
 	"""
 	degrees = (dayOfYear(datetimeInstance) - 81.0) * (360.0/365.0)
@@ -85,28 +50,10 @@ def equationOfTime(datetimeInstance):
 
 def declinationAngle(datetimeInstance):
 	"""
+	Calculates the Solar Declination Angle for a given date. The solar declination angle is the angle between a line connecting the center of the sun and earth and the project of that line on the equatorial plane. Calculation is based on McQuiston.
 
-	#### Summary
-
-	Calculates the Solar Declination Angle for a given date
-
-	#### Description
-
-	The solar declination angle is the angle between a line connecting the center of the sun and earth and the project of that line on the equatorial plane
-	Calculation is based on McQuiston.
-
-	#### Arguments:
-
-	* datetimeInstance
-		- Type: Python native datetime.datetime
-		- Description: The current date and time to be used in this calculation of day of year
-
-	#### Returns
-
-	* returnValue
-		- Type: Dictionary{ DR, Float }
-		- Description: The solar declination angle in a dictionary providing both radian and degree versions
-		- Units: { DR.Degrees: degrees, DR.Radians: radians }
+	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
+	:returns: [Dictionary {DR, Float}] The solar declination angle in a dictionary providing both radian and degree versions
 
 	"""
 	radians = math.radians((dayOfYear(datetimeInstance) - 1.0) * (360.0/365.0))
@@ -116,38 +63,14 @@ def declinationAngle(datetimeInstance):
 
 def localCivilTime(datetimeInstance, daylightSavingsOn, longitude, standardMeridian):
 	"""
+	Calculates the local civil time for a given set of time and location conditions.  The local civil time is the local time based on prime meridian and longitude
 
-	#### Summary
+	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
+	:param daylightSavingsOn: [Boolean] A flag if the current time is a daylight savings number.  If True, the hour is decremented.
+	:param longitude: [Float] [degrees west] The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
+	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
 
-	Calculates the local civil time for a given set of time and location conditions
-
-	#### Description
-
-	The local civil time is the local time based on prime meridian and longitude
-
-	#### Arguments:
-
-	* datetimeInstance
-		- Type: Python native datetime.datetime
-		- Description: The current date and time to be used in this calculation of day of year
-	* daylightSavingsOn
-		- Type: Boolean
-		- Description: A flag if the current time is a daylight savings number.  If True, the hour is decremented.
-	* longitude
-		- Type: Float
-		- Description: The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
-		- Units: degrees west
-	* standardMeridian
-		- Type: Float
-		- Description: The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
-		- Units: degrees west
-
-	#### Returns
-
-	* returnValue
-		- Type: Float
-		- Description: Returns the local civil time in hours for the given date/time/location
-		- Units: hours
+	:returns: [Float] [hours] Returns the local civil time in hours for the given date/time/location
 
 	"""
 	if daylightSavingsOn:
@@ -159,38 +82,14 @@ def localCivilTime(datetimeInstance, daylightSavingsOn, longitude, standardMerid
 
 def localSolarTime(datetimeInstance, daylightSavingsOn, longitude, standardMeridian):
 	"""
+	Calculates the local solar time for a given set of time and location conditions. The local solar time is the local civil time that has been corrected by the equation of time.
 
-	#### Summary
+	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
+	:param daylightSavingsOn: [Boolean] A flag if the current time is a daylight savings number.  If True, the hour is decremented.
+	:param longitude: [Float] [degrees west] The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
+	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
 
-	Calculates the local solar time for a given set of time and location conditions
-
-	#### Description
-
-	The local solar time is the local civil time that has been corrected by the equation of time
-
-	#### Arguments:
-
-	* datetimeInstance
-		- Type: Python native datetime.datetime
-		- Description: The current date and time to be used in this calculation of day of year
-	* daylightSavingsOn
-		- Type: Boolean
-		- Description: A flag if the current time is a daylight savings number.  If True, the hour is decremented.
-	* longitude
-		- Type: Float
-		- Description: The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
-		- Units: degrees west
-	* standardMeridian
-		- Type: Float
-		- Description: The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
-		- Units: degrees west
-
-	#### Returns
-
-	* returnValue
-		- Type: Float
-		- Description: Returns the local solar time in hours for the given date/time/location
-		- Units: hours
+	:returns: [Float] [hours] Returns the local solar time in hours for the given date/time/location
 
 	"""
 
@@ -199,38 +98,14 @@ def localSolarTime(datetimeInstance, daylightSavingsOn, longitude, standardMerid
 
 def hourAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian):
 	"""
+	Calculates the current hour angle for a given set of time and location conditions. The hour angle is the angle between solar noon and the current solar angle, so at local solar noon the value is zero, and at sunrise/sunset, the value maximizes.
 
-	#### Summary
+	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
+	:param daylightSavingsOn: [Boolean] A flag if the current time is a daylight savings number.  If True, the hour is decremented.
+	:param longitude: [Float] [degrees west] The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
+	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
 
-	Calculates the current hour angle for a given set of time and location conditions
-
-	#### Description
-
-	The hour angle is the angle between solar noon and the current solar angle, so at local solar noon the value is zero, and at sunrise/sunset, the value maximizes.
-
-	#### Arguments:
-
-	* datetimeInstance
-		- Type: Python native datetime.datetime
-		- Description: The current date and time to be used in this calculation of day of year
-	* daylightSavingsOn
-		- Type: Boolean
-		- Description: A flag if the current time is a daylight savings number.  If True, the hour is decremented.
-	* longitude
-		- Type: Float
-		- Description: The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
-		- Units: degrees west
-	* standardMeridian
-		- Type: Float
-		- Description: The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
-		- Units: degrees west
-
-	#### Returns
-
-	* returnValue
-		- Type: Dictionary{ DR, Float }
-		- Description: The hour angle in a dictionary providing both radian and degree versions
-		- Units: { DR.Degrees: degrees, DR.Radians: radians }
+	:returns: [Dictionary {DR, Float}] The hour angle in a dictionary providing both radian and degree versions
 
 	"""
 	localSolarTimeHours = localSolarTime(datetimeInstance, daylightSavingsOn, longitude, standardMeridian)
@@ -240,42 +115,15 @@ def hourAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian):
 
 def altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude):
 	"""
+	Calculates the current solar altitude angle for a given set of time and location conditions. The solar altitude angle is the angle between the sun rays and the horizontal plane.
 
-	#### Summary
+	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
+	:param daylightSavingsOn: [Boolean] A flag if the current time is a daylight savings number.  If True, the hour is decremented.
+	:param longitude: [Float] [degrees west] The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
+	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
+	:param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
 
-	Calculates the current solar altitude angle for a given set of time and location conditions
-
-	#### Description
-
-	The solar altitude angle is the angle between the sun rays and the horizontal plane
-
-	#### Arguments:
-
-	* datetimeInstance
-		- Type: Python native datetime.datetime
-		- Description: The current date and time to be used in this calculation of day of year
-	* daylightSavingsOn
-		- Type: Boolean
-		- Description: A flag if the current time is a daylight savings number.  If True, the hour is decremented.
-	* longitude
-		- Type: Float
-		- Description: The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
-		- Units: degrees west
-	* standardMeridian
-		- Type: Float
-		- Description: The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
-		- Units: degrees west
-	* latitude
-		- Type: Float
-		- Description: The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
-		- Units: degrees north
-
-	#### Returns
-
-	* returnValue
-		- Type: Dictionary{ DR, Float }
-		- Description: The solar altitude angle in a dictionary providing both radian and degree versions
-		- Units: { DR.Degrees: degrees, DR.Radians: radians }
+	:returns: [Dictionary {DR, Float}] The solar altitude angle in a dictionary providing both radian and degree versions
 
 	"""
 	declinRadians = declinationAngle(datetimeInstance)[DR.Radians]
@@ -287,42 +135,15 @@ def altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridi
 
 def solarAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude):
 	"""
+	Calculates the current solar azimuth angle for a given set of time and location conditions. The solar azimuth angle is the angle in the horizontal plane between due south and the sun.
 
-	#### Summary
+	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
+	:param daylightSavingsOn: [Boolean] A flag if the current time is a daylight savings number.  If True, the hour is decremented.
+	:param longitude: [Float] [degrees west] The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
+	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
+	:param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
 
-	Calculates the current solar azimuth angle for a given set of time and location conditions
-
-	#### Description
-
-	The solar azimuth angle is the angle in the horizontal plane between due south and the sun
-
-	#### Arguments:
-
-	* datetimeInstance
-		- Type: Python native datetime.datetime
-		- Description: The current date and time to be used in this calculation of day of year
-	* daylightSavingsOn
-		- Type: Boolean
-		- Description: A flag if the current time is a daylight savings number.  If True, the hour is decremented.
-	* longitude
-		- Type: Float
-		- Description: The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
-		- Units: degrees west
-	* standardMeridian
-		- Type: Float
-		- Description: The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
-		- Units: degrees west
-	* latitude
-		- Type: Float
-		- Description: The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
-		- Units: degrees north
-
-	#### Returns
-
-	* returnValue
-		- Type: Dictionary{ DR, Float }
-		- Description: The solar azimuth angle in a dictionary providing both radian and degree versions
-		- Units: { DR.Degrees: degrees, DR.Radians: radians }
+	:returns: [Dictionary {DR, Float}] The solar azimuth angle in a dictionary providing both radian and degree versions
 
 	"""
 	declinRadians = declinationAngle(datetimeInstance)[DR.Radians]
@@ -334,46 +155,16 @@ def solarAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMe
 
 def wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg):
 	"""
+	Calculates the current wall azimuth angle for a given set of time and location conditions, and a surface orientation. The wall azimiuth angle is the angle in the horizontal plane between the solar azimuth and the vertical wall's outward facing normal vector.
 
-	#### Summary
+	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
+	:param daylightSavingsOn: [Boolean] A flag if the current time is a daylight savings number.  If True, the hour is decremented.
+	:param longitude: [Float] [degrees west] The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
+	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
+	:param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
+	:param surfaceAzimuthDeg: [Float] [degrees CW from South] The angle between south and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 45, northwest facing surface: 135)
 
-	Calculates the current wall azimuth angle for a given set of time and location conditions, and a surface orientation
-
-	#### Description
-
-	The wall azimiuth angle is the angle in the horizontal plane between the solar azimuth and the vertical wall's outward facing normal vector
-
-	#### Arguments:
-
-	* datetimeInstance
-		- Type: Python native datetime.datetime
-		- Description: The current date and time to be used in this calculation of day of year
-	* daylightSavingsOn
-		- Type: Boolean
-		- Description: A flag if the current time is a daylight savings number.  If True, the hour is decremented.
-	* longitude
-		- Type: Float
-		- Description: The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
-		- Units: degrees west
-	* standardMeridian
-		- Type: Float
-		- Description: The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
-		- Units: degrees west
-	* latitude
-		- Type: Float
-		- Description: The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
-		- Units: degrees north
-	* surfaceAzimuthDeg
-		- Type: Float
-		- Description: The angle between south and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 45, northwest facing surface: 135)
-		- Units: degrees clockwise from south
-
-	#### Returns
-
-	* returnValue
-		- Type: Dictionary{ DR, Float }
-		- Description: The wall azimuth angle in a dictionary providing both radian and degree versions
-		- Units: { DR.Degrees: degrees, DR.Radians: radians }
+	:returns: [Dictionary {DR, Float}] The wall azimuth angle in a dictionary providing both radian and degree versions
 
 	"""
 	thisSurfaceAzimuthDeg = surfaceAzimuthDeg % 360
@@ -395,46 +186,16 @@ def wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMer
 
 def solarAngleOfIncidence(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg):
 	"""
+	Calculates the solar angle of incidence for a given set of time and location conditions, and a surface orientation. The solar angle of incidence is the angle between the solar ray vector incident on the surface, and the outward facing surface normal vector.
 
-	#### Summary
+	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
+	:param daylightSavingsOn: [Boolean] A flag if the current time is a daylight savings number.  If True, the hour is decremented.
+	:param longitude: [Float] [degrees west] The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
+	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
+	:param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
+	:param surfaceAzimuthDeg: [Float] [degrees CW from South] The angle between south and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 45, northwest facing surface: 135)
 
-	Calculates the solar angle of incidence for a given set of time and location conditions, and a surface orientation
-
-	#### Description
-
-	The solar angle of incidence is the angle between the solar ray vector incident on the surface, and the outward facing surface normal vector
-
-	#### Arguments:
-
-	* datetimeInstance
-		- Type: Python native datetime.datetime
-		- Description: The current date and time to be used in this calculation of day of year
-	* daylightSavingsOn
-		- Type: Boolean
-		- Description: A flag if the current time is a daylight savings number.  If True, the hour is decremented.
-	* longitude
-		- Type: Float
-		- Description: The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
-		- Units: degrees west
-	* standardMeridian
-		- Type: Float
-		- Description: The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
-		- Units: degrees west
-	* latitude
-		- Type: Float
-		- Description: The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
-		- Units: degrees north
-	* surfaceAzimuthDeg
-		- Type: Float
-		- Description: The angle between south and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 45, northwest facing surface: 135)
-		- Units: degrees clockwise from south
-
-	#### Returns
-
-	* returnValue
-		- Type: Dictionary{ DR, Float }
-		- Description: The solar angle of incidence in a dictionary providing both radian and degree versions
-		- Units: { DR.Degrees: degrees, DR.Radians: radians }
+	:returns: [Dictionary {DR, Float}] The solar angle of incidence in a dictionary providing both radian and degree versions
 
 	"""
 	solarAzimuthRadiansAbsolute = abs(wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg)[DR.Radians])
@@ -444,50 +205,17 @@ def solarAngleOfIncidence(datetimeInstance, daylightSavingsOn, longitude, standa
 
 def directRadiationOnSurface(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg, horizontalDirectIrradiation):
 	"""
+	Calculates the amount of direct solar radiation incident on a surface for a given set of time and location conditions, a surface orientation, and a total global horizontal direct irradiation. This is merely the global horizontal direct solar irradiation time the angle of incidence on the surface.
 
-	#### Summary
+	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
+	:param daylightSavingsOn: [Boolean] A flag if the current time is a daylight savings number.  If True, the hour is decremented.
+	:param longitude: [Float] [degrees west] The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
+	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
+	:param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
+	:param surfaceAzimuthDeg: [Float] [degrees CW from South] The angle between south and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 45, northwest facing surface: 135)
+	:param horizontalDirectIrradiation: [Float] [any] The global horizontal direct irradiation at the location.
 
-	Calculates the amount of direct solar radiation incident on a surface for a given set of time and location conditions, a surface orientation, and a total global horizontal direct irradiation
-
-	#### Description
-
-	This is merely the global horizontal direct solar irradiation time the angle of incidence on the surface
-
-	#### Arguments:
-
-	* datetimeInstance
-		- Type: Python native datetime.datetime
-		- Description: The current date and time to be used in this calculation of day of year
-	* daylightSavingsOn
-		- Type: Boolean
-		- Description: A flag if the current time is a daylight savings number.  If True, the hour is decremented.
-	* longitude
-		- Type: Float
-		- Description: The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
-		- Units: degrees west
-	* standardMeridian
-		- Type: Float
-		- Description: The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
-		- Units: degrees west
-	* latitude
-		- Type: Float
-		- Description: The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
-		- Units: degrees north
-	* surfaceAzimuthDeg
-		- Type: Float
-		- Description: The angle between south and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 45, northwest facing surface: 135)
-		- Units: degrees clockwise from south
-	* horizontalDirectIrradiation
-		- Type: Float
-		- Description: The global horizontal direct irradiation at the location
-		- Units: any, return value will match the input units
-
-	#### Returns
-
-	* returnValue
-		- Type: Float
-		- Description: The incident direct radiation on the surface
-		- Units: output matches units of the input argument: horizontalDirectIrradiation
+	:returns: [Dictionary {DR, Float}] The incident direct radiation on the surface.  The units of this return value match the units of the parameter :horizontalDirectIrradiation:
 
 	"""
 	return horizontalDirectIrradiation * math.cos( solarAngleOfIncidence(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg)[DR.Radians] )
