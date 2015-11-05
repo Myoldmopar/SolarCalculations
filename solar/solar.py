@@ -14,12 +14,29 @@ import math
 # So there wasn't anything that needed to persist, and the arguments got real funny between instantiation and function calls
 # Thus it is just a little library of functions
 
-class DR:
+class AngularValueType:
 	"""
 	This class is essentially an Enum container holding enums for degrees and radians to be used as dictionary keys in function return values
 	"""
-	Degrees = -1
-	Radians = -2
+	def __init__(self, radians=None, degrees=None):
+		if not radians and not degrees:
+			self.valued = False
+			self.radians = None
+			self.degrees = None
+		elif radians and not degrees:
+			self.valued = True
+			self.radians = radians
+			self.degrees = math.degrees(radians)
+		elif degrees and not radians:
+			self.valued = True
+			self.radians = math.radians(degrees)
+			self.degrees = degrees
+		else: # degrees and radians
+			if abs(math.degrees(radians) - degrees) > 0.01:
+				raise ValueError("Radians and Degrees both given but don't agree")
+			self.valued = True
+			self.radians = radians
+			self.degrees = degrees
 
 def dayOfYear(datetimeInstance):
 	"""
@@ -53,13 +70,12 @@ def declinationAngle(datetimeInstance):
 	Calculates the Solar Declination Angle for a given date. The solar declination angle is the angle between a line connecting the center of the sun and earth and the project of that line on the equatorial plane. Calculation is based on McQuiston.
 
 	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
-	:returns: [Dictionary {DR, Float}] The solar declination angle in a dictionary providing both radian and degree versions
+	:returns: [AngularValueType] The solar declination angle in an AngularValueType with both radian and degree versions
 
 	"""
 	radians = math.radians((dayOfYear(datetimeInstance) - 1.0) * (360.0/365.0))
 	decAngleDeg = 0.3963723 - 22.9132745 * math.cos(radians) + 4.0254304 * math.sin(radians) - 0.387205 * math.cos(2.0 * radians) + 0.05196728 * math.sin(2.0 * radians) - 0.1545267 * math.cos(3.0 * radians) + 0.08479777 * math.sin(3.0 * radians)
-	decAngleRad = math.radians(decAngleDeg)
-	return {DR.Degrees: decAngleDeg, DR.Radians: decAngleRad}
+	return AngularValueType(degrees=decAngleDeg)
 
 def localCivilTime(datetimeInstance, daylightSavingsOn, longitude, standardMeridian):
 	"""
@@ -105,13 +121,12 @@ def hourAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian):
 	:param longitude: [Float] [degrees west] The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
 	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
 
-	:returns: [Dictionary {DR, Float}] The hour angle in a dictionary providing both radian and degree versions
+	:returns: [AngularValueType] The hour angle in an AngularValueType with both radian and degree versions
 
 	"""
 	localSolarTimeHours = localSolarTime(datetimeInstance, daylightSavingsOn, longitude, standardMeridian)
 	hourAngleDeg = 15.0 * (localSolarTimeHours - 12)
-	hourAngleRad = math.radians(hourAngleDeg)
-	return {DR.Degrees: hourAngleDeg, DR.Radians: hourAngleRad}
+	return AngularValueType(degrees=hourAngleDeg)
 
 def altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude):
 	"""
@@ -123,15 +138,14 @@ def altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridi
 	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
 	:param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
 
-	:returns: [Dictionary {DR, Float}] The solar altitude angle in a dictionary providing both radian and degree versions
+	:returns: [AngularValueType] The solar altitude angle in an AngularValueType with both radian and degree versions
 
 	"""
 	declinRadians = declinationAngle(datetimeInstance)[DR.Radians]
 	hourRadians = hourAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian)[DR.Radians]
 	latitudeRad = math.radians(latitude)
 	altitudeAngleRadians = math.asin( math.cos(latitudeRad) * math.cos(declinRadians) * math.cos(hourRadians) + math.sin(latitudeRad) * math.sin(declinRadians) )
-	altitudeAngleDegrees = math.degrees(altitudeAngleRadians)
-	return {DR.Degrees: altitudeAngleDegrees, DR.Radians: altitudeAngleRadians}
+	return AngularValueType(radians=altitudeAngleRadians)
 
 def solarAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude):
 	"""
@@ -143,14 +157,14 @@ def solarAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMe
 	:param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
 	:param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
 
-	:returns: [Dictionary {DR, Float}] The solar azimuth angle in a dictionary providing both radian and degree versions.  NOTE: If the sun is down, the Float values in the dictionary are None.
+	:returns: [AngularValueType] The solar azimuth angle in an AngularValueType with both radian and degree versions.  NOTE: If the sun is down, the Float values in the dictionary are None.
 
 	"""
 	declinRadians = declinationAngle(datetimeInstance)[DR.Radians]
 	altitudeDegrees = altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude)[DR.Degrees]
 	altitudeRadians = math.radians(altitudeDegrees)
 	if altitudeDegrees < 0: # sun is down
-		return {DR.Degrees: None, DR.Radians: None}
+		return AngularValueType()
 	zenithRadians = math.radians(90-altitudeDegrees)
 	latitudeRad = math.radians(latitude)
 	hourRad = hourAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian)[DR.Radians]
@@ -160,8 +174,7 @@ def solarAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMe
 	else:
 		azimuthFromSouth = -arccosineFromSouth
 	azimuthAngleRadians = math.radians(180)-azimuthFromSouth
-	azimuthAngleDegrees = math.degrees(azimuthAngleRadians)
-	return {DR.Degrees: azimuthAngleDegrees, DR.Radians: azimuthAngleRadians}
+	return AngularValueType(radians=azimuthAngleRadians)
 
 def wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg):
 	"""
@@ -174,19 +187,18 @@ def wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMer
 	:param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
 	:param surfaceAzimuthDeg: [Float] [degrees CW from North] The angle between north and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 225, northwest facing surface: 315)
 
-	:returns: [Dictionary {DR, Float}] The wall azimuth angle in a dictionary providing both radian and degree versions.  NOTE: If the sun is behind the surface, the Float values in the dictionary are None.
+	:returns: [AngularValueType] The wall azimuth angle in an AngularValueType with both radian and degree versions.  NOTE: If the sun is behind the surface, the Float values in the dictionary are None.
 
 	"""
 	thisSurfaceAzimuthDeg = surfaceAzimuthDeg % 360
 	operator = 0
 	solarAzimuth = solarAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude)[DR.Degrees]
 	if solarAzimuth is None: # sun is down
-		return {DR.Degrees: None, DR.Radians: None}
+		return AngularValueType()
 	wallAzimuthDegrees = solarAzimuth - surfaceAzimuthDeg
 	if wallAzimuthDegrees > 90 or wallAzimuthDegrees < -90:
-		return {DR.Degrees: None, DR.Radians: None}
-	wallAzimuthRadians = math.radians(wallAzimuthDegrees)
-	return {DR.Degrees: wallAzimuthDegrees, DR.Radians: wallAzimuthRadians}
+		return AngularValueType()
+	return AngularValueType(degrees=wallAzimuthDegrees)
 
 def solarAngleOfIncidence(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg):
 	"""
@@ -199,16 +211,15 @@ def solarAngleOfIncidence(datetimeInstance, daylightSavingsOn, longitude, standa
 	:param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
 	:param surfaceAzimuthDeg: [Float] [degrees CW from North] The angle between north and the outward facing normal vector of the wall, measured as positive clockwise from south (southwest facing surface: 225, northwest facing surface: 315)
 
-	:returns: [Dictionary {DR, Float}] The solar angle of incidence in a dictionary providing both radian and degree versions.  NOTE: If the sun is down, or behind the surface, the Float values in the dictionary are None.
+	:returns: [AngularValueType] The solar angle of incidence in an AngularValueType with both radian and degree versions.  NOTE: If the sun is down, or behind the surface, the Float values in the dictionary are None.
 
 	"""
 	wallAzimuthRad = wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg)[DR.Radians]
 	if wallAzimuthRad is None:
-		return {DR.Degrees: None, DR.Radians: None}
+		return AngularValueType()
 	altitudeRad = altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude)[DR.Radians]
 	azimuthAngleRadians = math.acos( math.cos(altitudeRad) * math.cos(wallAzimuthRad) )
-	azimuthAngleDegrees = math.degrees(azimuthAngleRadians)
-	return {DR.Degrees: azimuthAngleDegrees, DR.Radians: azimuthAngleRadians}
+	return AngularValueType(radians=azimuthAngleRadians)
 
 def directRadiationOnSurface(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg, horizontalDirectIrradiation):
 	"""
