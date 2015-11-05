@@ -51,7 +51,7 @@ hours = []
 for hour in range(0,24): # gives zero-based hours as expected in the datetime constructor
 	x.append(hour)
 	dt = datetime(2001, 6, 21, hour, 00, 00)
-	hours.append(solar.hourAngle(dt, True, longitude, stdmeridian)[solar.DR.Degrees])
+	hours.append(solar.hourAngle(dt, True, longitude, stdmeridian).degrees)
 
 plt.plot(x, hours, 'b', label='Hour Angle')
 plt.xlim([0,23])
@@ -75,9 +75,9 @@ beta_summer = []
 for hour in range(0,24): # gives zero-based hours as expected in the datetime constructor
 	x.append(hour)
 	dt = datetime(2001, 12, 21, hour, 00, 00)
-	beta_winter.append(solar.altitudeAngle(dt, False, longitude, stdmeridian, latitude)[solar.DR.Degrees])
+	beta_winter.append(solar.altitudeAngle(dt, False, longitude, stdmeridian, latitude).degrees)
 	dt = datetime(2001, 6, 21, hour, 00, 00)
-	beta_summer.append(solar.altitudeAngle(dt, True, longitude, stdmeridian, latitude)[solar.DR.Degrees])
+	beta_summer.append(solar.altitudeAngle(dt, True, longitude, stdmeridian, latitude).degrees)
 
 plt.plot(x, beta_winter, 'b', label='Winter')
 plt.plot(x, beta_summer, 'r', label='Summer')
@@ -101,7 +101,7 @@ solar_az = []
 for hour in range(0,24): # gives zero-based hours as expected in the datetime constructor
 	x.append(hour)
 	dt = datetime(2001, 6, 21, hour, 00, 00)
-	solar_az.append(solar.solarAzimuthAngle(dt, True, longitude, stdmeridian, latitude)[solar.DR.Degrees])
+	solar_az.append(solar.solarAzimuthAngle(dt, True, longitude, stdmeridian, latitude).degrees)
 
 plt.plot(x, solar_az, 'b', label='Solar Azimuth Angle')
 plt.xlim([0,23])
@@ -129,9 +129,9 @@ west_az = []
 for hour in range(0,24): # gives zero-based hours as expected in the datetime constructor
 	x.append(hour)
 	dt = datetime(2001, 6, 21, hour, 00, 00)
-	east_az.append(solar.wallAzimuthAngle(dt, True, longitude, stdmeridian, latitude, east_wall_normal_from_north)[solar.DR.Degrees])
-	south_az.append(solar.wallAzimuthAngle(dt, True, longitude, stdmeridian, latitude, south_wall_normal_from_north)[solar.DR.Degrees])
-	west_az.append(solar.wallAzimuthAngle(dt, True, longitude, stdmeridian, latitude, west_wall_normal_from_north)[solar.DR.Degrees])
+	east_az.append(solar.wallAzimuthAngle(dt, True, longitude, stdmeridian, latitude, east_wall_normal_from_north).degrees)
+	south_az.append(solar.wallAzimuthAngle(dt, True, longitude, stdmeridian, latitude, south_wall_normal_from_north).degrees)
+	west_az.append(solar.wallAzimuthAngle(dt, True, longitude, stdmeridian, latitude, west_wall_normal_from_north).degrees)
 
 plt.plot(x, east_az,  'r', label='East Wall Azimuth Angle')
 plt.plot(x, south_az, 'g', label='South Wall Azimuth Angle')
@@ -160,9 +160,9 @@ alt = []
 for hour in range(0,24): # gives zero-based hours as expected in the datetime constructor
 	x.append(hour)
 	dt = datetime(2001, 6, 21, hour, 00, 00)
-	east_az.append(solar.wallAzimuthAngle(dt, True, longitude, stdmeridian, latitude, east_wall_normal_from_north)[solar.DR.Degrees])
-	east_theta.append(solar.solarAngleOfIncidence(dt, True, longitude, stdmeridian, latitude, east_wall_normal_from_north)[solar.DR.Degrees])
-	alt.append(solar.altitudeAngle(dt, True, longitude, stdmeridian, latitude)[solar.DR.Degrees])
+	east_az.append(solar.wallAzimuthAngle(dt, True, longitude, stdmeridian, latitude, east_wall_normal_from_north).degrees)
+	east_theta.append(solar.solarAngleOfIncidence(dt, True, longitude, stdmeridian, latitude, east_wall_normal_from_north).degrees)
+	alt.append(solar.altitudeAngle(dt, True, longitude, stdmeridian, latitude).degrees)
 
 plt.plot(x, alt,        'r', label='Solar Altitude Angle')
 plt.plot(x, east_az,    'g', label='East Wall Azimuth Angle')
