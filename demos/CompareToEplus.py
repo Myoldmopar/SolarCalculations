@@ -24,7 +24,7 @@ with open('/tmp/compare_winter_angles_library.csv', 'w') as csvfile:
 	mywriter.writerow(['Hour', 'Hour Angle', 'Solar Altitude', 'Solar Azimuth'])
 	for hour in range(0,24): # gives zero-based hours as expected in the datetime constructor
 		x = hour
-		dt = datetime(2001, 12, 21, hour, 00, 00)
+		dt = datetime(2001, 12, 21, hour, 30, 00)
 		thour = solar.hourAngle(dt, False, longitude, stdmeridian)[solar.DR.Degrees]
 		altitude = solar.altitudeAngle(dt, False, longitude, stdmeridian, latitude)[solar.DR.Degrees]
 		azimuth = solar.solarAzimuthAngle(dt, False, longitude, stdmeridian, latitude)[solar.DR.Degrees]
@@ -35,7 +35,7 @@ with open('/tmp/compare_summer_angles_library.csv', 'w') as csvfile:
 	mywriter.writerow(['Hour', 'Hour Angle', 'Solar Altitude', 'Solar Azimuth'])
 	for hour in range(0,24): # gives zero-based hours as expected in the datetime constructor
 		x = hour
-		dt = datetime(2001, 7, 21, hour, 00, 00)
+		dt = datetime(2001, 7, 21, hour, 30, 00)
 		thour = solar.hourAngle(dt, False, longitude, stdmeridian)[solar.DR.Degrees]
 		altitude = solar.altitudeAngle(dt, False, longitude, stdmeridian, latitude)[solar.DR.Degrees]
 		azimuth = solar.solarAzimuthAngle(dt, False, longitude, stdmeridian, latitude)[solar.DR.Degrees]
