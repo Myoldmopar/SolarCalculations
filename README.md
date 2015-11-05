@@ -9,3 +9,9 @@ The functions are all documented with Markdown syntax doc strings in a way that 
 
 ## Testing
 The source is tested using the python unittest framework.  To execute all the unit tests, just execute the test file (since it calls `unittest.main()`): `python test/test_solar.py`.  I still have several more unit tests to add.
+
+## Validation
+The code has been carefully compared against numerous sampled points in the unit tests, and also [against EnergyPlus output](https://github.com/Myoldmopar/SolarCalculations/wiki/CompareToEnergyPlus), to ensure accurate values are being calculated.  If you find something wrong, just [file an issue](https://github.com/Myoldmopar/SolarCalculations/issues/new)!
+
+## Demonstration
+In order to show how to use the library, a [demonstration page](https://github.com/Myoldmopar/SolarCalculations/wiki/DemoSolarAngles) was created, that is based on the source in the demos/ folder.
