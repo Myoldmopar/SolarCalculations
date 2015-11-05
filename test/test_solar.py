@@ -56,18 +56,18 @@ class TestDeclinationAngle(unittest.TestCase):
 	# validation from Table 6-1 of the reference listed above
 	def test_declinationsOn21s(self):
 		tolerance = 1.25 # 1.25 degrees...
-		self.assertAlmostEqual(declinationAngle(datetime(2001, 1,21,00,00,00))[DR.Degrees], -20.2, delta=tolerance)
-		self.assertAlmostEqual(declinationAngle(datetime(2001, 2,21,00,00,00))[DR.Degrees], -10.8, delta=tolerance)
-		self.assertAlmostEqual(declinationAngle(datetime(2001, 3,21,00,00,00))[DR.Degrees],   0.0, delta=tolerance)
-		self.assertAlmostEqual(declinationAngle(datetime(2001, 4,21,00,00,00))[DR.Degrees],  11.6, delta=tolerance)
-		self.assertAlmostEqual(declinationAngle(datetime(2001, 5,21,00,00,00))[DR.Degrees],  20.0, delta=tolerance)
-		self.assertAlmostEqual(declinationAngle(datetime(2001, 6,21,00,00,00))[DR.Degrees],  23.5, delta=tolerance)
-		self.assertAlmostEqual(declinationAngle(datetime(2001, 7,21,00,00,00))[DR.Degrees],  20.6, delta=tolerance)
-		self.assertAlmostEqual(declinationAngle(datetime(2001, 8,21,00,00,00))[DR.Degrees],  12.3, delta=tolerance)
-		self.assertAlmostEqual(declinationAngle(datetime(2001, 9,21,00,00,00))[DR.Degrees],   0.0, delta=tolerance)
-		self.assertAlmostEqual(declinationAngle(datetime(2001,10,21,00,00,00))[DR.Degrees], -10.5, delta=tolerance)
-		self.assertAlmostEqual(declinationAngle(datetime(2001,11,21,00,00,00))[DR.Degrees], -19.8, delta=tolerance)
-		self.assertAlmostEqual(declinationAngle(datetime(2001,12,21,00,00,00))[DR.Degrees], -23.5, delta=tolerance)
+		self.assertAlmostEqual(declinationAngle(datetime(2001, 1,21,00,00,00)).degrees, -20.2, delta=tolerance)
+		self.assertAlmostEqual(declinationAngle(datetime(2001, 2,21,00,00,00)).degrees, -10.8, delta=tolerance)
+		self.assertAlmostEqual(declinationAngle(datetime(2001, 3,21,00,00,00)).degrees,   0.0, delta=tolerance)
+		self.assertAlmostEqual(declinationAngle(datetime(2001, 4,21,00,00,00)).degrees,  11.6, delta=tolerance)
+		self.assertAlmostEqual(declinationAngle(datetime(2001, 5,21,00,00,00)).degrees,  20.0, delta=tolerance)
+		self.assertAlmostEqual(declinationAngle(datetime(2001, 6,21,00,00,00)).degrees,  23.5, delta=tolerance)
+		self.assertAlmostEqual(declinationAngle(datetime(2001, 7,21,00,00,00)).degrees,  20.6, delta=tolerance)
+		self.assertAlmostEqual(declinationAngle(datetime(2001, 8,21,00,00,00)).degrees,  12.3, delta=tolerance)
+		self.assertAlmostEqual(declinationAngle(datetime(2001, 9,21,00,00,00)).degrees,   0.0, delta=tolerance)
+		self.assertAlmostEqual(declinationAngle(datetime(2001,10,21,00,00,00)).degrees, -10.5, delta=tolerance)
+		self.assertAlmostEqual(declinationAngle(datetime(2001,11,21,00,00,00)).degrees, -19.8, delta=tolerance)
+		self.assertAlmostEqual(declinationAngle(datetime(2001,12,21,00,00,00)).degrees, -23.5, delta=tolerance)
 
 class TestLocalCivilTime(unittest.TestCase):
 
@@ -100,7 +100,7 @@ class TestHourAngle(unittest.TestCase):
 		self.assertAlmostEqual(localCivilTime(dt, dst_on, longitude, stdmeridican), 9.3, delta=0.1)
 		self.assertAlmostEqual(equationOfTime(dt), -6.2, delta=0.2)
 		self.assertAlmostEqual(localSolarTime(dt, dst_on, longitude, stdmeridican), 9.23, delta=0.01)
-		self.assertAlmostEqual(hourAngle(dt, dst_on, longitude, stdmeridican)[DR.Degrees], -41.5, delta=0.1) # we are using negative in the morning; positive in the afternoon
+		self.assertAlmostEqual(hourAngle(dt, dst_on, longitude, stdmeridican).degrees, -41.5, delta=0.1) # we are using negative in the morning; positive in the afternoon
 
 	# test solar noon on standard meridian, should be zero right?
 	def test_solarNoon(self):
@@ -108,7 +108,7 @@ class TestHourAngle(unittest.TestCase):
 		dst_on = False
 		longitude = 90
 		stdmeridican = 90
-		self.assertAlmostEqual(hourAngle(dt, dst_on, longitude, stdmeridican)[DR.Degrees], 0, delta=0.1)
+		self.assertAlmostEqual(hourAngle(dt, dst_on, longitude, stdmeridican).degrees, 0, delta=0.1)
 
 class TestAltitudeAngle(unittest.TestCase):
 
@@ -119,7 +119,7 @@ class TestAltitudeAngle(unittest.TestCase):
 		longitude = 85
 		stdmeridican = 90
 		latitude = 40
-		self.assertAlmostEqual(altitudeAngle(dt, dst_on, longitude, stdmeridican, latitude)[DR.Degrees], 49.7, delta=0.1)
+		self.assertAlmostEqual(altitudeAngle(dt, dst_on, longitude, stdmeridican, latitude).degrees, 49.7, delta=0.1)
 
 class TestAzimuthAngle(unittest.TestCase):
 
@@ -132,7 +132,7 @@ class TestAzimuthAngle(unittest.TestCase):
 		latitude = 40
 		expectedAzimuthFromSouth = 73.7
 		expectedAzimuthFromNorth = 180 - expectedAzimuthFromSouth
-		self.assertAlmostEqual(solarAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude)[DR.Degrees], expectedAzimuthFromNorth, delta=0.1)
+		self.assertAlmostEqual(solarAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude).degrees, expectedAzimuthFromNorth, delta=0.1)
 
 class TestWallAzimuthAngle(unittest.TestCase):
 
@@ -146,7 +146,7 @@ class TestWallAzimuthAngle(unittest.TestCase):
 		wallnormal = 90 # north, degrees
 		expected_solar_azimuth = 180-73.7
 		expected_wall_azimuth = expected_solar_azimuth - wallnormal
-		self.assertAlmostEqual(wallAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude, wallnormal)[DR.Degrees], expected_wall_azimuth, delta=0.1)
+		self.assertAlmostEqual(wallAzimuthAngle(dt, dst_on, longitude, stdmeridican, latitude, wallnormal).degrees, expected_wall_azimuth, delta=0.1)
 
 class TestSolarAngleOfIncidence(unittest.TestCase):
 
@@ -162,7 +162,7 @@ class TestSolarAngleOfIncidence(unittest.TestCase):
 		expected_wall_azimuth = math.radians(expected_solar_azimuth - wallnormal)
 		expected_solar_altitude = math.radians(49.7)
 		expected_theta = math.acos(math.cos(expected_wall_azimuth) * math.cos(expected_solar_altitude))
-		self.assertAlmostEqual(solarAngleOfIncidence(dt, dst_on, longitude, stdmeridican, latitude, wallnormal)[DR.Radians], expected_theta, delta=0.001)
+		self.assertAlmostEqual(solarAngleOfIncidence(dt, dst_on, longitude, stdmeridican, latitude, wallnormal).radians, expected_theta, delta=0.001)
 
 class TestRadiationOnSurface(unittest.TestCase):
 
@@ -173,7 +173,7 @@ class TestRadiationOnSurface(unittest.TestCase):
 		stdmeridican = 90
 		latitude = 40
 		wallnormal = 180 # south, degrees
-		theta = solarAngleOfIncidence(dt, dst_on, longitude, stdmeridican, latitude, wallnormal)[DR.Radians]
+		theta = solarAngleOfIncidence(dt, dst_on, longitude, stdmeridican, latitude, wallnormal).radians
 		insolation = 293 # watts
 		self.assertAlmostEqual(directRadiationOnSurface(dt, dst_on, longitude, stdmeridican, latitude, wallnormal, insolation), insolation * math.cos(theta), delta=0.1)
 

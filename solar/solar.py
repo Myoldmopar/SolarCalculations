@@ -16,9 +16,24 @@ import math
 
 class AngularValueType:
 	"""
-	This class is essentially an Enum container holding enums for degrees and radians to be used as dictionary keys in function return values
+	This class combines a numeric value with an angular measurement unit.
+
+	Proper construction should call constructor with either radians=x or degrees=y; not both.  The constructor will calculate the complementary.  The value of the angle can then be retrieve from the .degrees or .radians value as needed.
+
+	Another class member, called .valued is available to determine if the class members contain meaningful values.
+
+	If the constructor is called without either argument, the .valued variable is False, and the numeric variables are None.
+
+	If the constructor is called with both arguments, they will be assigned if they agree to within a small tolerance, or a ValueError is thrown.
 	"""
 	def __init__(self, radians=None, degrees=None):
+		"""
+		Constructor for the class.  Call it with either radians or degrees, not both.
+
+		>>> a = AngularValueType(radians=math.pi)
+		>>> a = AngularValueType(degrees=180)
+		"""
+
 		if not radians and not degrees:
 			self.valued = False
 			self.radians = None
@@ -141,8 +156,8 @@ def altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridi
 	:returns: [AngularValueType] The solar altitude angle in an AngularValueType with both radian and degree versions
 
 	"""
-	declinRadians = declinationAngle(datetimeInstance)[DR.Radians]
-	hourRadians = hourAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian)[DR.Radians]
+	declinRadians = declinationAngle(datetimeInstance).radians
+	hourRadians = hourAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian).radians
 	latitudeRad = math.radians(latitude)
 	altitudeAngleRadians = math.asin( math.cos(latitudeRad) * math.cos(declinRadians) * math.cos(hourRadians) + math.sin(latitudeRad) * math.sin(declinRadians) )
 	return AngularValueType(radians=altitudeAngleRadians)
@@ -160,14 +175,14 @@ def solarAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMe
 	:returns: [AngularValueType] The solar azimuth angle in an AngularValueType with both radian and degree versions.  NOTE: If the sun is down, the Float values in the dictionary are None.
 
 	"""
-	declinRadians = declinationAngle(datetimeInstance)[DR.Radians]
-	altitudeDegrees = altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude)[DR.Degrees]
+	declinRadians = declinationAngle(datetimeInstance).radians
+	altitudeDegrees = altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude).degrees
 	altitudeRadians = math.radians(altitudeDegrees)
 	if altitudeDegrees < 0: # sun is down
 		return AngularValueType()
 	zenithRadians = math.radians(90-altitudeDegrees)
 	latitudeRad = math.radians(latitude)
-	hourRad = hourAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian)[DR.Radians]
+	hourRad = hourAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian).radians
 	arccosineFromSouth = math.acos( ( math.sin(altitudeRadians) * math.sin(latitudeRad) - math.sin(declinRadians) ) / ( math.cos(altitudeRadians) * math.cos(latitudeRad)) )
 	if hourRad < 0:
 		azimuthFromSouth = arccosineFromSouth
@@ -192,7 +207,7 @@ def wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMer
 	"""
 	thisSurfaceAzimuthDeg = surfaceAzimuthDeg % 360
 	operator = 0
-	solarAzimuth = solarAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude)[DR.Degrees]
+	solarAzimuth = solarAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude).degrees
 	if solarAzimuth is None: # sun is down
 		return AngularValueType()
 	wallAzimuthDegrees = solarAzimuth - surfaceAzimuthDeg
@@ -214,10 +229,10 @@ def solarAngleOfIncidence(datetimeInstance, daylightSavingsOn, longitude, standa
 	:returns: [AngularValueType] The solar angle of incidence in an AngularValueType with both radian and degree versions.  NOTE: If the sun is down, or behind the surface, the Float values in the dictionary are None.
 
 	"""
-	wallAzimuthRad = wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg)[DR.Radians]
+	wallAzimuthRad = wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg).radians
 	if wallAzimuthRad is None:
 		return AngularValueType()
-	altitudeRad = altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude)[DR.Radians]
+	altitudeRad = altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude).radians
 	azimuthAngleRadians = math.acos( math.cos(altitudeRad) * math.cos(wallAzimuthRad) )
 	return AngularValueType(radians=azimuthAngleRadians)
 
@@ -236,7 +251,7 @@ def directRadiationOnSurface(datetimeInstance, daylightSavingsOn, longitude, sta
 	:returns: [Dictionary {DR, Float}] The incident direct radiation on the surface.  The units of this return value match the units of the parameter :horizontalDirectIrradiation:
 
 	"""
-	theta = solarAngleOfIncidence(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg)[DR.Radians]
+	theta = solarAngleOfIncidence(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg).radians
 	if theta is None:
 		return None
 	return horizontalDirectIrradiation * math.cos( theta )
