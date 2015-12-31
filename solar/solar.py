@@ -210,7 +210,7 @@ def wallAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMer
 	solarAzimuth = solarAzimuthAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude).degrees
 	if solarAzimuth is None: # sun is down
 		return AngularValueType()
-	wallAzimuthDegrees = solarAzimuth - surfaceAzimuthDeg
+	wallAzimuthDegrees = solarAzimuth - thisSurfaceAzimuthDeg
 	if wallAzimuthDegrees > 90 or wallAzimuthDegrees < -90:
 		return AngularValueType()
 	return AngularValueType(degrees=wallAzimuthDegrees)
@@ -233,8 +233,9 @@ def solarAngleOfIncidence(datetimeInstance, daylightSavingsOn, longitude, standa
 	if wallAzimuthRad is None:
 		return AngularValueType()
 	altitudeRad = altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude).radians
-	azimuthAngleRadians = math.acos( math.cos(altitudeRad) * math.cos(wallAzimuthRad) )
-	return AngularValueType(radians=azimuthAngleRadians)
+	incidenceAngleRadians = math.acos( math.cos(altitudeRad) * math.cos(wallAzimuthRad) )
+	#print("inside solarAngleOfIncidence:, datetime = %s, wallAzimuth = %s, altitude = %s, incidence = %s" % (datetimeInstance, wallAzimuthRad, altitudeRad, incidenceAngleRadians))
+	return AngularValueType(radians=incidenceAngleRadians)
 
 def directRadiationOnSurface(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, surfaceAzimuthDeg, horizontalDirectIrradiation):
 	"""

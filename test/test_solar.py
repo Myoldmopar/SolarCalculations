@@ -164,6 +164,19 @@ class TestSolarAngleOfIncidence(unittest.TestCase):
 		expected_theta = math.acos(math.cos(expected_wall_azimuth) * math.cos(expected_solar_altitude))
 		self.assertAlmostEqual(solarAngleOfIncidence(dt, dst_on, longitude, stdmeridican, latitude, wallnormal).radians, expected_theta, delta=0.001)
 
+	# test case for azimuth specified greater than 360
+	def test_overRatedSurface(self):
+		dt = datetime(2001, 7, 21, 10, 00, 00)
+		dst_on = True
+		longitude = 85
+		stdmeridican = 90
+		latitude = 40
+		wallnormal = 90 # south, degrees
+		base_theta = solarAngleOfIncidence(dt, dst_on, longitude, stdmeridican, latitude, wallnormal).radians
+		wallnormal = 90+360 # south, degrees
+		over_rotated_theta = solarAngleOfIncidence(dt, dst_on, longitude, stdmeridican, latitude, wallnormal).radians
+		self.assertAlmostEqual(over_rotated_theta, base_theta, delta=0.001)
+
 class TestRadiationOnSurface(unittest.TestCase):
 
 	def test_directRadiationOnSurfaceSouthFacing(self):
