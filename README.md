@@ -1,6 +1,6 @@
 # SolarCalculations
 This is a collection of solar angle and related calculations.
-
+ 
 ## Source
 These are based mostly on Chapter 6 of _Heating, Ventilation, and Air Conditioning_ by Faye McQuistion and Jerald Parker, 3rd Edition, 1988, with minor pieces from other versions of the same book.  Other sources are noted in the source.  All the functions were written from scratch by me.
 
