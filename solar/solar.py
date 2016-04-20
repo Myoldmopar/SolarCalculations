@@ -256,3 +256,47 @@ def directRadiationOnSurface(datetimeInstance, daylightSavingsOn, longitude, sta
 	if theta is None:
 		return None
 	return horizontalDirectIrradiation * math.cos( theta )
+
+def getDirectDiffuseSplit(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude, horizontalTotalIrradiation):
+	"""
+	Calculates the direct and diffuse split for a given amount of global total horizontal irradiation
+
+	:param datetimeInstance: [Python native datetime.datetime] The current date and time to be used in this calculation of day of year.
+        :param daylightSavingsOn: [Boolean] A flag if the current time is a daylight savings number.  If True, the hour is decremented.
+        :param longitude: [Float] [degrees west] The current longitude in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.2.
+        :param standardMeridian: [Float] [degrees west] The local standard meridian for the location, in degrees west of the prime meridian.  For Golden, CO, the variable should be = 105.
+        :param latitude: [Float] [degrees north] The local latitude for the location, in degrees north of the equator.  For Golden, CO, the variable should be = 39.75.
+	:param horizontalTotalIrradiation: [Float] The total horizontal irradiation at a given time
+
+	:returns: [Dictionary {String, Float}] A dictionary returning the direct and diffuse portions of a given horizontal irradiation value, two keys: "direct" and "diffuse" are in the dictionary
+	"""
+	# mostly found from:  Modelling Methods for Energy in Buildings By Chris Underwood, Francis Yik, 2004, Blackwell Publishing, 
+	# for a horizontal surface, the theta between surface normal and the vector to the sun is simply the altitude angle
+	theta_h = altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude)
+	# calculate total extraterrestrial radiation
+	# reference: Duffie and Beckman 1991
+	I_0 = 1367   # solar constant, W/m2, 
+	n_day = dayOfYear(datetimeInstance)     # day of year, 
+	I_E = I_0 * ( 1 + 0.033 * math.cos( 360 * n_day / 365 ) ) * math.cos( theta_h.radians )
+	# calculate clearness index
+	# reference: convention, no specific ref
+	k_c = horizontalTotalIrradiation / I_E # clearness index, ratio 0-1
+	# calculate the diffuse/total ratio
+	# reference: Skartveit & Olseth 1987
+	# first some constants recommended from the model author
+	k_c_0 = 0.2
+	k_c_1 = 0.87 - 0.56 * math.exp(-0.06 * (90 - theta_h.degrees))
+	alpha = 1.09
+	a = 0.27
+	d = 0.15 + 0.43 * math.exp(-0.06 * (90 - theta_h.degrees))
+	def func(k_c):
+		pi = 3.14159265358979
+		K = 0.5 * ( 1 + math.sin( pi * (k_c - k_c_0)/(k_c_1 - k_c_0) - 0.5 ) )
+		return 1 - ( 1 - d ) * ( a * math.sqrt( K ) + ( 1 - a ) * K**2 )
+	if k_c < k_c_0:
+		diffuse_ratio = 1
+	elif k_c < k_c_1:
+		diffuse_ratio = func(k_c)
+	else:
+		diffuse_ratio = 1 - alpha * k_c_1 * ( 1 - func( alpha * k_c ) / k_c )
+	return {"diffuse": horizontalTotalIrradiation * diffuse_ratio, "direct": horizontalTotalIrradiation * ( 1 - diffuse_ratio )}

@@ -190,6 +190,18 @@ class TestRadiationOnSurface(unittest.TestCase):
 		insolation = 293 # watts
 		self.assertAlmostEqual(directRadiationOnSurface(dt, dst_on, longitude, stdmeridican, latitude, wallnormal, insolation), insolation * math.cos(theta), delta=0.1)
 
+class TestDirectDiffuseSplit(unittest.TestCase):
+
+	def test_directDiffuseSplit(self):
+                dt = datetime(2001, 7, 21, 10, 00, 00)
+                dst_on = True
+                longitude = 85
+                stdmeridian = 90
+                latitude = 40
+                insolation = 1093 # watts
+		self.assertAlmostEqual(getDirectDiffuseSplit(dt, dst_on, longitude, stdmeridian, latitude, insolation)["diffuse"], 826.095, delta=0.01)
+		
+
 
 # allow execution directly as python tests/test_solar.py
 if __name__ == '__main__':
