@@ -281,22 +281,29 @@ def getDirectDiffuseSplit(datetimeInstance, daylightSavingsOn, longitude, standa
 	# calculate clearness index
 	# reference: convention, no specific ref
 	k_c = horizontalTotalIrradiation / I_E # clearness index, ratio 0-1
+	if k_c > 1.0:
+		k_c = 1.0 # should this be OK to have more solar radiation than that allowed on a clear day? -- NO, right?
+		horizontalTotalIrradiation = I_E
 	# calculate the diffuse/total ratio
 	# reference: Skartveit & Olseth 1987
-	# first some constants recommended from the model author
-	k_c_0 = 0.2
-	k_c_1 = 0.87 - 0.56 * math.exp(-0.06 * (90 - theta_h.degrees))
-	alpha = 1.09
-	a = 0.27
-	d = 0.15 + 0.43 * math.exp(-0.06 * (90 - theta_h.degrees))
-	def func(k_c):
-		pi = 3.14159265358979
-		K = 0.5 * ( 1 + math.sin( pi * (k_c - k_c_0)/(k_c_1 - k_c_0) - 0.5 ) )
-		return 1 - ( 1 - d ) * ( a * math.sqrt( K ) + ( 1 - a ) * K**2 )
-	if k_c < k_c_0:
+	pi = 3.14159265358979
+	# calculate k values: k_1, k_2, and k_max so that we know which region we are in
+	k_1 = 0.83 - 0.56 * math.exp( -0.06 * theta_h.degrees )
+	k_2 = 0.95 * k_1
+	alpha =  ( 1 / math.sin( theta_h.radians ) )**0.6
+	k_b_max = 0.81**alpha
+	d_1 = 0.07 + 0.046 * (90 - theta_h.degrees) / (theta_h.degrees + 3)
+	bigK1 = 0.5 * ( 1 + math.sin( pi * ( k_c - 0.22 ) / ( k_1 - 0.22 ) - pi / 2 ) )
+	bigK2 = 0.5 * ( 1 + math.sin( pi * ( k_2 - 0.22 ) / ( k_1 - 0.22 ) - pi / 2 ) )
+	d_2 = 1 - ( 1 - d_1 ) * ( 0.11 * math.sqrt( bigK2 ) + 0.15 * bigK2 + 0.74 * bigK2**2 )
+	k_max = (k_b_max + d_2*k_2/(1-k_2))/(1 + d_2*k_2/(1-k_2))
+	if k_c < 0.22:
 		diffuse_ratio = 1
-	elif k_c < k_c_1:
-		diffuse_ratio = func(k_c)
+	elif k_c < k_2:
+		diffuse_ratio = 1 - ( 1 - d_1 ) * ( 0.11 * math.sqrt( bigK1 ) + 0.15 * bigK1 + 0.74 * bigK1**2 )
+	elif k_c < k_max:
+		diffuse_ratio = d_2 * k_2 * ( 1 - k_c ) / ( k_c * ( 1 - k_2 ) )	
 	else:
-		diffuse_ratio = 1 - alpha * k_c_1 * ( 1 - func( alpha * k_c ) / k_c )
+		d_max = d_2 * k_2 * ( 1 - k_max ) / ( k_max * ( 1 - k_2 ) )
+		diffuse_ratio = 1 - k_max * ( 1 - d_max ) / k_c
 	return {"diffuse": horizontalTotalIrradiation * diffuse_ratio, "direct": horizontalTotalIrradiation * ( 1 - diffuse_ratio )}
