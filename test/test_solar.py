@@ -199,7 +199,7 @@ class TestDirectDiffuseSplit(unittest.TestCase):
                 stdmeridian = 90
                 latitude = 40
                 insolation = 800 # watts
-		self.assertAlmostEqual(getDirectDiffuseSplit(dt, dst_on, longitude, stdmeridian, latitude, insolation)["diffuse"], 826.095, delta=0.01)
+		self.assertAlmostEqual(getDirectDiffuseSplit(dt, dst_on, longitude, stdmeridian, latitude, insolation)["diffuse"], 121.484, delta=0.01)
 		
 
 
