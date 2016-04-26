@@ -273,6 +273,13 @@ def getDirectDiffuseSplit(datetimeInstance, daylightSavingsOn, longitude, standa
 	# mostly found from:  Modelling Methods for Energy in Buildings By Chris Underwood, Francis Yik, 2004, Blackwell Publishing, 
 	# for a horizontal surface, the theta between surface normal and the vector to the sun is simply the altitude angle
 	theta_h = altitudeAngle(datetimeInstance, daylightSavingsOn, longitude, standardMeridian, latitude)
+	# some cases we can return early:
+	#  if theta is nil or negative, then just assume any solar radiation is diffuse and return no direct portion
+	#  if the solar radiation is zero, just leave with zero
+	if ( not theta_h.valued ) or ( theta_h.degrees <= 0.0 ):
+		return {"diffuse":horizontalTotalIrradiation, "direct":0.0}
+	elif horizontalTotalIrradiation <= 0.0:
+		return {"diffuse":0.0, "direct":0.0}
 	# calculate total extraterrestrial radiation
 	# reference: Duffie and Beckman 1991
 	I_0 = 1367   # solar constant, W/m2, 

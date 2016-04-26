@@ -200,8 +200,15 @@ class TestDirectDiffuseSplit(unittest.TestCase):
                 latitude = 40
                 insolation = 800 # watts
 		self.assertAlmostEqual(getDirectDiffuseSplit(dt, dst_on, longitude, stdmeridian, latitude, insolation)["diffuse"], 121.484, delta=0.01)
-		
+	        
+		# now check for a non-zero-solar, yet sundown condition
+		dt = datetime(2001, 7, 21, 02, 00, 00)
+		self.assertAlmostEqual(getDirectDiffuseSplit(dt, dst_on, longitude, stdmeridian, latitude, insolation)["diffuse"], 800, delta=0.01)
 
+		# now check for a zero solar condition
+		dt = datetime(2001, 7, 21, 10, 00, 00)
+		insolation = 0.0
+		self.assertAlmostEqual(getDirectDiffuseSplit(dt, dst_on, longitude, stdmeridian, latitude, insolation)["diffuse"], 0, delta=0.01)
 
 # allow execution directly as python tests/test_solar.py
 if __name__ == '__main__':
