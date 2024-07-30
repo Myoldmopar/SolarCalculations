@@ -9,6 +9,7 @@ flake8
 
 # for documentation
 sphinx
+sphinx-rtd-theme
 
 # for packaging
 wheel
