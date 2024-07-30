@@ -28,6 +28,10 @@ class TestAngularValueType(TestCase):
         with self.assertRaises(ValueError):
             Angular(degrees=180, radians=2 * 3.14)
 
+    def test_string(self):
+        a = Angular(degrees=1)
+        self.assertIsInstance(str(a), str)
+
 
 class TestDayOfYear(TestCase):
 
@@ -107,6 +111,10 @@ class TestLocalCivilTime(TestCase):
         standard_meridian = Angular(degrees=90)
         self.assertAlmostEqual(local_civil_time(dt, dst_on, longitude, standard_meridian), 9.67, delta=0.01)
 
+    def test_bad_arguments(self):
+        with self.assertRaises(ValueError):
+            local_civil_time(datetime.now(), True, Angular(), Angular())
+
 
 class TestLocalSolarTime(TestCase):
 
@@ -117,6 +125,10 @@ class TestLocalSolarTime(TestCase):
         longitude = Angular(degrees=95)
         standard_meridian = Angular(degrees=90)
         self.assertAlmostEqual(local_solar_time(dt, dst_on, longitude, standard_meridian), 9.43, delta=0.01)
+
+    def test_bad_arguments(self):
+        with self.assertRaises(ValueError):
+            local_solar_time(datetime.now(), True, Angular(), Angular())
 
 
 class TestHourAngle(TestCase):
@@ -142,6 +154,10 @@ class TestHourAngle(TestCase):
         standard_meridian = Angular(degrees=90)
         self.assertAlmostEqual(hour_angle(dt, dst_on, longitude, standard_meridian).degrees, 0, delta=0.1)
 
+    def test_bad_arguments(self):
+        with self.assertRaises(ValueError):
+            hour_angle(datetime.now(), True, Angular(), Angular())
+
 
 class TestAltitudeAngle(TestCase):
 
@@ -152,8 +168,13 @@ class TestAltitudeAngle(TestCase):
         longitude = Angular(degrees=85)
         standard_meridian = Angular(degrees=90)
         latitude = Angular(degrees=40)
-        self.assertAlmostEqual(altitude_angle(dt, dst_on, longitude, standard_meridian, latitude).degrees, 49.7,
-                               delta=0.1)
+        self.assertAlmostEqual(
+            altitude_angle(dt, dst_on, longitude, standard_meridian, latitude).degrees, 49.7, delta=0.1
+        )
+
+    def test_bad_arguments(self):
+        with self.assertRaises(ValueError):
+            altitude_angle(datetime.now(), True, Angular(), Angular(), Angular())
 
 
 class TestAzimuthAngle(TestCase):
@@ -170,6 +191,16 @@ class TestAzimuthAngle(TestCase):
         self.assertAlmostEqual(azimuth_angle(dt, dst_on, longitude, standard_meridian, latitude).degrees,
                                expected_azimuth_from_north, delta=0.1)
 
+    # how about an afternoon one?
+    def test_afternoon(self):
+        dt = datetime(2001, 7, 21, 16, 00, 00)
+        dst_on = True
+        longitude = Angular(degrees=85)
+        standard_meridian = Angular(degrees=90)
+        latitude = Angular(degrees=40)
+        # I just made up this example to ensure the code path works, so I'm not validating it against a value
+        self.assertTrue(azimuth_angle(dt, dst_on, longitude, standard_meridian, latitude).valued)
+
     # test one with the sun down to get a null-ish response
     def test_sun_is_down(self):
         dt = datetime(2001, 3, 21, 22, 00, 00)
@@ -179,10 +210,14 @@ class TestAzimuthAngle(TestCase):
         latitude = Angular(degrees=40)
         self.assertFalse(azimuth_angle(dt, dst_on, longitude, standard_meridian, latitude).valued)
 
+    def test_bad_arguments(self):
+        with self.assertRaises(ValueError):
+            azimuth_angle(datetime.now(), True, Angular(), Angular(), Angular())
+
 
 class TestWallAzimuthAngle(TestCase):
 
-    # test east facing wall where the solar_angles azimuth is known from a prior unit test
+    # test south? facing wall where the solar_angles azimuth is known from a prior unit test
     def test_gamma_south_facing(self):
         dt = datetime(2001, 7, 21, 10, 00, 00)
         dst_on = True
@@ -198,6 +233,16 @@ class TestWallAzimuthAngle(TestCase):
             delta=0.1
         )
 
+    # test north facing wall where the azimuth should be behind the wall
+    def test_gamma_north_facing(self):
+        dt = datetime(2001, 7, 21, 10, 00, 00)
+        dst_on = True
+        longitude = Angular(degrees=85)
+        standard_meridian = Angular(degrees=90)
+        latitude = Angular(degrees=40)
+        wall_normal = Angular(degrees=270)
+        self.assertFalse(wall_azimuth_angle(dt, dst_on, longitude, standard_meridian, latitude, wall_normal).valued)
+
     # test one with the sun down to get a null-ish response
     def test_sun_is_down(self):
         dt = datetime(2001, 3, 21, 22, 00, 00)
@@ -207,6 +252,10 @@ class TestWallAzimuthAngle(TestCase):
         latitude = Angular(degrees=40)
         wall_normal = Angular(degrees=90)
         self.assertFalse(wall_azimuth_angle(dt, dst_on, longitude, standard_meridian, latitude, wall_normal).valued)
+
+    def test_bad_arguments(self):
+        with self.assertRaises(ValueError):
+            wall_azimuth_angle(datetime.now(), True, Angular(), Angular(), Angular(), Angular())
 
 
 class TestSolarAngleOfIncidence(TestCase):
@@ -252,6 +301,10 @@ class TestSolarAngleOfIncidence(TestCase):
             solar_angle_of_incidence(dt, dst_on, longitude, standard_meridian, latitude, wall_normal).valued
         )
 
+    def test_bad_arguments(self):
+        with self.assertRaises(ValueError):
+            solar_angle_of_incidence(datetime.now(), True, Angular(), Angular(), Angular(), Angular())
+
 
 class TestRadiationOnSurface(TestCase):
 
@@ -267,3 +320,9 @@ class TestRadiationOnSurface(TestCase):
         self.assertAlmostEqual(
             direct_radiation_on_surface(dt, dst_on, longitude, standard_meridian, latitude, wall_normal, insolation),
             insolation * cos(theta), delta=0.1)
+
+    def test_bad_arguments(self):
+        with self.assertRaises(ValueError):
+            direct_radiation_on_surface(
+                datetime.now(), True, Angular(), Angular(), Angular(), Angular(), 1000
+            )
