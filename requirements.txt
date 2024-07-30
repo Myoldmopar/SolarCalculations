@@ -1,7 +1,15 @@
+# actual dependencies
 matplotlib
+
+# for testing
 pytest
 coverage
 coveralls
 flake8
+
+# for documentation
 sphinx
+
+# for packaging
 wheel
+setuptools
