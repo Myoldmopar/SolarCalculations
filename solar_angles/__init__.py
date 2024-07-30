@@ -1,2 +1,2 @@
 PACKAGE_NAME = "solar_angles"
-VERSION = "0.25"
+VERSION = "0.26"
