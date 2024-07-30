@@ -192,8 +192,11 @@ class TestWallAzimuthAngle(TestCase):
         wall_normal = Angular(degrees=90)
         expected_solar_azimuth = 180 - 73.7
         expected_wall_azimuth = expected_solar_azimuth - wall_normal.degrees
-        self.assertAlmostEqual(wall_azimuth_angle(dt, dst_on, longitude, standard_meridian, latitude, wall_normal).degrees,
-                               expected_wall_azimuth, delta=0.1)
+        self.assertAlmostEqual(
+            wall_azimuth_angle(dt, dst_on, longitude, standard_meridian, latitude, wall_normal).degrees,
+            expected_wall_azimuth,
+            delta=0.1
+        )
 
     # test one with the sun down to get a null-ish response
     def test_sun_is_down(self):
