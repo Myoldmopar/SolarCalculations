@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# solar documentation build configuration file, created by
+# solar_angles documentation build configuration file, created by
 # sphinx-quickstart on Tue Nov  3 16:48:55 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -19,7 +19,7 @@ import shlex
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../solar'))
+sys.path.insert(0, os.path.abspath('../solar_angles'))
 
 # -- General configuration ------------------------------------------------
 
@@ -50,7 +50,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'solar'
+project = u'solar_angles'
 copyright = u'2015, Edwin Lee'
 author = u'Edwin Lee'
 
@@ -226,7 +226,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'solar.tex', u'solar Documentation',
+  (master_doc, 'solar_angles.tex', u'solar_angles Documentation',
    u'Edwin Lee', 'manual'),
 ]
 
@@ -256,7 +256,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'solar', u'solar Documentation',
+    (master_doc, 'solar_angles', u'solar_angles Documentation',
      [author], 1)
 ]
 
@@ -270,8 +270,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'solar', u'solar Documentation',
-   author, 'solar', 'One line description of project.',
+  (master_doc, 'solar_angles', u'solar_angles Documentation',
+   author, 'solar_angles', 'One line description of project.',
    'Miscellaneous'),
 ]
 

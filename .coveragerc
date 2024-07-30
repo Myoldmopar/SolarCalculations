@@ -1,0 +1,6 @@
+[run]
+source = solar_angles
+
+[report]
+omit =
+    */solar_angles/demos/*.py

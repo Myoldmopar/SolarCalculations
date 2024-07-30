@@ -1,0 +1,7 @@
+matplotlib
+pytest
+coverage
+coveralls
+flake8
+sphinx
+wheel
