@@ -62,13 +62,9 @@ class Angular:
         return f"{self.valued=}, {self._radians=}, {self._degrees=}"
 
     def radians(self) -> float:
-        if not self.valued:
-            raise ValueError("Invalid numerics for this Angular instance")
         return self._radians
 
     def degrees(self) -> float:
-        if not self.valued:
-            raise ValueError("Invalid numerics for this Angular instance")
         return self._degrees
 
 
@@ -132,8 +128,6 @@ def local_civil_time(time_stamp: datetime, daylight_savings_on: bool, longitude:
 
     :returns: [hours] Returns the local civil time in hours for the given date/time/location
     """
-    if not all([x.valued for x in [longitude, standard_meridian]]):
-        raise ValueError("Invalid arguments to local_civil_time, must all be valid Angular objects")
     civil_hour = time_stamp.time().hour
     if daylight_savings_on:
         civil_hour -= 1
@@ -158,8 +152,6 @@ def local_solar_time(time_stamp: datetime, daylight_savings_on: bool, longitude:
 
     :returns: [hours] Returns the local solar time in hours for the given date/time/location
     """
-    if not all([x.valued for x in [longitude, standard_meridian]]):
-        raise ValueError("Invalid arguments to local_solar_time, must all be valid Angular objects")
     return local_civil_time(
         time_stamp, daylight_savings_on, longitude, standard_meridian
     ) + equation_of_time(time_stamp) / 60.0
@@ -182,8 +174,6 @@ def hour_angle(time_stamp: datetime, daylight_savings_on: bool, longitude: Angul
 
     :returns: The hour angle in an Angular with both radian and degree versions
     """
-    if not all([x.valued for x in [longitude, standard_meridian]]):
-        raise ValueError("Invalid arguments to hour_angle, must all be valid Angular objects")
     local_solar_time_hours = local_solar_time(time_stamp, daylight_savings_on, longitude, standard_meridian)
     hour_angle_deg = 15.0 * (local_solar_time_hours - 12)
     return Angular(degrees=hour_angle_deg)
@@ -207,8 +197,6 @@ def altitude_angle(time_stamp: datetime, daylight_savings_on: bool, longitude: A
 
     :returns: [Angular] The solar altitude angle in an Angular with both radian and degree versions
     """
-    if not all([x.valued for x in [longitude, standard_meridian, latitude]]):
-        raise ValueError("Invalid arguments to altitude_angle, must all be valid Angular objects")
     declination_radians = declination_angle(time_stamp).radians()
     hour_radians = hour_angle(time_stamp, daylight_savings_on, longitude, standard_meridian).radians()
     altitude_radians = math.asin(
@@ -237,8 +225,6 @@ def azimuth_angle(time_stamp: datetime, daylight_savings_on: bool, longitude: An
 
     :returns: [Angular] The solar azimuth angle in an Angular with both radian and degree versions.
     """
-    if not all([x.valued for x in [longitude, standard_meridian, latitude]]):
-        raise ValueError("Invalid arguments to azimuth_angle, must all be valid Angular objects")
     declination_radians = declination_angle(time_stamp).radians()
     altitude = altitude_angle(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude)
     if altitude.degrees() < 0:  # sun is down
@@ -277,8 +263,6 @@ def wall_azimuth_angle(time_stamp: datetime, daylight_savings_on: bool, longitud
 
     :returns: [Angular] The wall azimuth angle in an Angular with both radian and degree versions.
     """
-    if not all([x.valued for x in [longitude, standard_meridian, latitude, surface_azimuth]]):
-        raise ValueError("Invalid arguments to wall_azimuth_angle, must all be valid Angular objects")
     this_surface_azimuth_deg = surface_azimuth.degrees() % 360
     solar_azimuth = azimuth_angle(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude).degrees()
     if solar_azimuth is None:  # sun is down
@@ -312,8 +296,6 @@ def solar_angle_of_incidence(time_stamp: datetime, daylight_savings_on: bool, lo
 
     :returns: [Angular] The solar angle of incidence in an Angular with both radian & degree versions.
     """
-    if not all([x.valued for x in [longitude, standard_meridian, latitude, surface_azimuth]]):
-        raise ValueError("Invalid arguments to solar_angle_of_incidence, must all be valid Angular objects")
     wall_azimuth_rad = wall_azimuth_angle(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude,
                                           surface_azimuth).radians()
     if wall_azimuth_rad is None:
@@ -348,8 +330,6 @@ def direct_radiation_on_surface(time_stamp: datetime, daylight_savings_on: bool,
     :returns: The incident direct radiation on the surface.
               The units of this return value match the units of the parameter :horizontal_direct_irradiation:
     """
-    if not all([x.valued for x in [longitude, standard_meridian, latitude, surface_azimuth]]):
-        raise ValueError("Invalid arguments to direct_radiation_on_surface, must all be valid Angular objects")
     theta = solar_angle_of_incidence(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude,
                                      surface_azimuth).radians()
     return horizontal_direct_irradiation * math.cos(theta)
