@@ -264,9 +264,10 @@ def wall_azimuth_angle(time_stamp: datetime, daylight_savings_on: bool, longitud
     :returns: [Angular] The wall azimuth angle in an Angular with both radian and degree versions.
     """
     this_surface_azimuth_deg = surface_azimuth.degrees() % 360
-    solar_azimuth = azimuth_angle(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude).degrees()
-    if solar_azimuth is None:  # sun is down
-        raise ValueError("Cannot calculate wall azimuth angle because sun is down")
+    try:
+        solar_azimuth = azimuth_angle(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude).degrees()
+    except ValueError:  # TODO: Make SunIsDownException
+        raise ValueError("Cannot calculate wall azimuth angle because sun is down") from None
     wall_azimuth_degrees = solar_azimuth - this_surface_azimuth_deg
     if wall_azimuth_degrees > 90 or wall_azimuth_degrees < -90:
         raise ValueError("Cannot calculate wall azimuth angle because sun is behind surface")
@@ -296,10 +297,11 @@ def solar_angle_of_incidence(time_stamp: datetime, daylight_savings_on: bool, lo
 
     :returns: [Angular] The solar angle of incidence in an Angular with both radian & degree versions.
     """
-    wall_azimuth_rad = wall_azimuth_angle(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude,
-                                          surface_azimuth).radians()
-    if wall_azimuth_rad is None:
-        raise ValueError("Cannot calculate wall azimuth angle, perhaps sun is down")
+    try:
+        wall_azimuth_rad = wall_azimuth_angle(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude,
+                                              surface_azimuth).radians()
+    except ValueError:  # TODO: Make SunIsDownException
+        raise ValueError("Cannot calculate wall azimuth angle because sun is down") from None
     altitude_rad = altitude_angle(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude).radians()
     incidence_angle_radians = math.acos(math.cos(altitude_rad) * math.cos(wall_azimuth_rad))
     return Angular(radians=incidence_angle_radians)
