@@ -6,6 +6,7 @@ pytest
 coverage
 coveralls
 flake8
+mypy
 
 # for documentation
 sphinx

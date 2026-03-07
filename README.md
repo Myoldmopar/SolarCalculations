@@ -4,7 +4,7 @@ This is a collection of solar angle and related calculations.
 ## Source
 These are based mostly on Chapter 6 of _Heating, Ventilation, and Air Conditioning_ by Faye McQuistion and Jerald Parker, 3rd Edition, 1988, with minor pieces from other versions of the same book.  Other sources are noted in the source.  All the functions were written from scratch by me.
 
-## Releases [![PyPIRelease](https://github.com/Myoldmopar/SolarCalculations/actions/workflows/release.yml/badge.svg)](https://github.com/Myoldmopar/SolarCalculations/actions/workflows/release.yml) ![PyPI - Version](https://img.shields.io/pypi/v/solar-angles?color=44cc11)
+## Releases [![PyPIRelease](https://github.com/Myoldmopar/SolarCalculations/actions/workflows/release.yml/badge.svg)](https://github.com/Myoldmopar/SolarCalculations/actions/workflows/release.yml) x
 The latest release can be found on the [Releases](https://github.com/Myoldmopar/SolarCalculations/releases/latest) page.  All packages are distributed through [PyPi](https://pypi.org/project/solar-angles/).
 
 ## Documentation [![Documentation Status](https://readthedocs.org/projects/solarcalculations/badge/?version=latest)](https://solarcalculations.readthedocs.io/en/latest/?badge=latest)
