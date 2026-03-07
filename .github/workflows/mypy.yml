@@ -15,7 +15,7 @@ jobs:
         python-version: '3.12'
 
     - name: Install Pip Dependencies
-      run: pip install mypy
+      run: pip install -r requirements.txt
 
-    - name: Run Flake8
+    - name: Run MyPy
       run: mypy solar_angles --disallow-untyped-calls --disallow-untyped-defs --check-untyped-defs
