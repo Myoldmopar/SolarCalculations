@@ -1,5 +1,6 @@
 import math
 from datetime import datetime
+from math import isnan
 
 
 # The calculations here are based on Chapter 6 of
@@ -29,35 +30,46 @@ class Angular:
     otherwise a ValueError is thrown.
     """
 
-    def __init__(self, radians=None, degrees=None):
+    def __init__(self, radians: float = math.nan, degrees: float = math.nan) -> None:
         """
         Constructor for the class.  Call it with either radians or degrees, not both.
 
         >>> a = Angular(radians=math.pi)
         >>> b = Angular(degrees=180)
         """
+        self.valued = False
+        self._radians = math.nan
+        self._degrees = math.nan
 
-        if not radians and not degrees:
-            self.valued = False
-            self.radians = None
-            self.degrees = None
-        elif radians and not degrees:
+        if isnan(radians) and isnan(degrees):
+            raise ValueError("Neither Radians or Degrees given; failing")
+        elif isnan(degrees) and not isnan(radians):
             self.valued = True
-            self.radians = radians
-            self.degrees = math.degrees(radians)
-        elif degrees and not radians:
+            self._radians = radians
+            self._degrees = math.degrees(radians)
+        elif isnan(radians) and not isnan(degrees):
             self.valued = True
-            self.radians = math.radians(degrees)
-            self.degrees = degrees
+            self._radians = math.radians(degrees)
+            self._degrees = degrees
         else:  # degrees and radians
             if abs(math.degrees(radians) - degrees) > 0.01:
                 raise ValueError("Radians and Degrees both given but don't agree")
             self.valued = True
-            self.radians = radians
-            self.degrees = degrees
+            self._radians = radians
+            self._degrees = degrees
 
     def __str__(self) -> str:
-        return f"{self.valued=}, {self.radians=}, {self.degrees=}"
+        return f"{self.valued=}, {self._radians=}, {self._degrees=}"
+
+    def radians(self) -> float:
+        if not self.valued:
+            raise ValueError("Invalid numerics for this Angular instance")
+        return self._radians
+
+    def degrees(self) -> float:
+        if not self.valued:
+            raise ValueError("Invalid numerics for this Angular instance")
+        return self._degrees
 
 
 def day_of_year(time_stamp: datetime) -> int:
@@ -126,7 +138,7 @@ def local_civil_time(time_stamp: datetime, daylight_savings_on: bool, longitude:
     if daylight_savings_on:
         civil_hour -= 1
     local_civil_time_hours = civil_hour + time_stamp.time().minute / 60.0 + time_stamp.time().second / 3600.0 - 4 * (
-            longitude.degrees - standard_meridian.degrees) / 60.0
+            longitude.degrees() - standard_meridian.degrees()) / 60.0
     return local_civil_time_hours
 
 
@@ -197,11 +209,11 @@ def altitude_angle(time_stamp: datetime, daylight_savings_on: bool, longitude: A
     """
     if not all([x.valued for x in [longitude, standard_meridian, latitude]]):
         raise ValueError("Invalid arguments to altitude_angle, must all be valid Angular objects")
-    declination_radians = declination_angle(time_stamp).radians
-    hour_radians = hour_angle(time_stamp, daylight_savings_on, longitude, standard_meridian).radians
+    declination_radians = declination_angle(time_stamp).radians()
+    hour_radians = hour_angle(time_stamp, daylight_savings_on, longitude, standard_meridian).radians()
     altitude_radians = math.asin(
-        math.cos(latitude.radians) * math.cos(declination_radians) * math.cos(hour_radians) + math.sin(
-            latitude.radians) * math.sin(declination_radians))
+        math.cos(latitude.radians()) * math.cos(declination_radians) * math.cos(hour_radians) + math.sin(
+            latitude.radians()) * math.sin(declination_radians))
     return Angular(radians=altitude_radians)
 
 
@@ -210,7 +222,8 @@ def azimuth_angle(time_stamp: datetime, daylight_savings_on: bool, longitude: An
     """
     Calculates the current solar azimuth angle for a given set of time and location conditions.
     The solar azimuth angle is the angle in the horizontal plane between due north and the sun.
-    It is measured clockwise, so that east is +90 degrees and west is +270 degrees.
+    It is measured clockwise, so that east is +90 degrees and west is +270 degrees.  Throws if the
+    angle cannot be calculated because the sun is down
 
     :param time_stamp: The current date and time to be used in this calculation of day of year.
     :param daylight_savings_on: A flag if the current time is a daylight savings number.
@@ -223,18 +236,17 @@ def azimuth_angle(time_stamp: datetime, daylight_savings_on: bool, longitude: An
                      For Golden, CO, the variable should be = 39.75 degrees.
 
     :returns: [Angular] The solar azimuth angle in an Angular with both radian and degree versions.
-              NOTE: If the sun is down, the Float values in the dictionary are None.
     """
     if not all([x.valued for x in [longitude, standard_meridian, latitude]]):
         raise ValueError("Invalid arguments to azimuth_angle, must all be valid Angular objects")
-    declination_radians = declination_angle(time_stamp).radians
+    declination_radians = declination_angle(time_stamp).radians()
     altitude = altitude_angle(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude)
-    if altitude.degrees < 0:  # sun is down
-        return Angular()
-    hour_radians = hour_angle(time_stamp, daylight_savings_on, longitude, standard_meridian).radians
+    if altitude.degrees() < 0:  # sun is down
+        raise ValueError("Cannot calculate azimuth angle because sun is down")
+    hour_radians = hour_angle(time_stamp, daylight_savings_on, longitude, standard_meridian).radians()
     acos_from_south = math.acos(
-        (math.sin(altitude.radians) * math.sin(latitude.radians) - math.sin(declination_radians)) / (
-                math.cos(altitude.radians) * math.cos(latitude.radians)))
+        (math.sin(altitude.radians()) * math.sin(latitude.radians()) - math.sin(declination_radians)) / (
+                math.cos(altitude.radians()) * math.cos(latitude.radians())))
     if hour_radians < 0:
         azimuth_from_south = acos_from_south
     else:
@@ -248,7 +260,7 @@ def wall_azimuth_angle(time_stamp: datetime, daylight_savings_on: bool, longitud
     """
     Calculates the current wall azimuth angle for a given set of time/location conditions, and a surface orientation.
     The wall azimuth angle is the angle in the horizontal plane between the solar azimuth
-    and the vertical wall's outward facing normal vector.
+    and the vertical wall's outward facing normal vector. Throws if the sun is behind the surface or the sun is down.
 
     :param time_stamp: The current date and time to be used in this calculation of day of year.
     :param daylight_savings_on: A flag if the current time is a daylight savings number.
@@ -264,17 +276,16 @@ def wall_azimuth_angle(time_stamp: datetime, daylight_savings_on: bool, longitud
                                 (southwest facing surface: 225 degrees, northwest facing surface: 315 degrees)
 
     :returns: [Angular] The wall azimuth angle in an Angular with both radian and degree versions.
-              NOTE: If the sun is behind the surface, the Float values in the object are None.
     """
     if not all([x.valued for x in [longitude, standard_meridian, latitude, surface_azimuth]]):
         raise ValueError("Invalid arguments to wall_azimuth_angle, must all be valid Angular objects")
-    this_surface_azimuth_deg = surface_azimuth.degrees % 360
-    solar_azimuth = azimuth_angle(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude).degrees
+    this_surface_azimuth_deg = surface_azimuth.degrees() % 360
+    solar_azimuth = azimuth_angle(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude).degrees()
     if solar_azimuth is None:  # sun is down
-        return Angular()
+        raise ValueError("Cannot calculate wall azimuth angle because sun is down")
     wall_azimuth_degrees = solar_azimuth - this_surface_azimuth_deg
     if wall_azimuth_degrees > 90 or wall_azimuth_degrees < -90:
-        return Angular()
+        raise ValueError("Cannot calculate wall azimuth angle because sun is behind surface")
     return Angular(degrees=wall_azimuth_degrees)
 
 
@@ -284,7 +295,7 @@ def solar_angle_of_incidence(time_stamp: datetime, daylight_savings_on: bool, lo
     """
     Calculates the solar angle of incidence for a given set of time and location conditions, and a surface orientation.
     The solar angle of incidence is the angle between the solar ray vector incident on the surface,
-    and the outward facing surface normal vector.
+    and the outward facing surface normal vector.  Throws if the wall azimuth cannot be calculated
 
     :param time_stamp: The current date and time to be used in this calculation of day of year.
     :param daylight_savings_on: A flag if the current time is a daylight savings number.
@@ -300,15 +311,14 @@ def solar_angle_of_incidence(time_stamp: datetime, daylight_savings_on: bool, lo
                                 (southwest facing surface: 225 degrees, northwest facing surface: 315 degrees)
 
     :returns: [Angular] The solar angle of incidence in an Angular with both radian & degree versions.
-              NOTE: If the sun is down, or behind the surface, the Float values in the object are None.
     """
     if not all([x.valued for x in [longitude, standard_meridian, latitude, surface_azimuth]]):
         raise ValueError("Invalid arguments to solar_angle_of_incidence, must all be valid Angular objects")
     wall_azimuth_rad = wall_azimuth_angle(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude,
-                                          surface_azimuth).radians
+                                          surface_azimuth).radians()
     if wall_azimuth_rad is None:
-        return Angular()
-    altitude_rad = altitude_angle(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude).radians
+        raise ValueError("Cannot calculate wall azimuth angle, perhaps sun is down")
+    altitude_rad = altitude_angle(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude).radians()
     incidence_angle_radians = math.acos(math.cos(altitude_rad) * math.cos(wall_azimuth_rad))
     return Angular(radians=incidence_angle_radians)
 
@@ -341,5 +351,5 @@ def direct_radiation_on_surface(time_stamp: datetime, daylight_savings_on: bool,
     if not all([x.valued for x in [longitude, standard_meridian, latitude, surface_azimuth]]):
         raise ValueError("Invalid arguments to direct_radiation_on_surface, must all be valid Angular objects")
     theta = solar_angle_of_incidence(time_stamp, daylight_savings_on, longitude, standard_meridian, latitude,
-                                     surface_azimuth).radians
+                                     surface_azimuth).radians()
     return horizontal_direct_irradiation * math.cos(theta)

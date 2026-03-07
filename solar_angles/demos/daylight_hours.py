@@ -1,29 +1,33 @@
 # import the datetime library so we construct proper datetime instances
 from datetime import datetime
+from math import nan
 
 # import the plotting library for demonstration -- pip install matplotlib should suffice
 import matplotlib.pyplot as plt
 
 # import the solar_angles library
-from solar_angles.solar import altitude_angle
+from solar_angles.solar import altitude_angle, Angular
 
 
-def calculate_sun_up_time(array_of_altitude_angles):
+def calculate_sun_up_time(array_of_altitude_angles: list[Angular]) -> float:
     found_above_time = False
-    last_alpha = None
-    for index, alpha in enumerate(array_of_altitude_angles):
+    last_alpha = -nan
+    for index, alpha_angle in enumerate(array_of_altitude_angles):
+        alpha = alpha_angle.degrees()
         if not found_above_time and alpha > 0:
             # we've got a match, calculate sun up and return
             sun_up_time = (index - 1) - (last_alpha / alpha) / (alpha - last_alpha)
             return sun_up_time
         else:
             last_alpha = alpha
+    return 0.0
 
 
-def calculate_sun_down_time(array_of_altitude_angles):
+def calculate_sun_down_time(array_of_altitude_angles: list[Angular]) -> float:
     found_below_time = False
-    last_alpha = None
-    for index, alpha in enumerate(array_of_altitude_angles):
+    last_alpha = -nan
+    for index, alpha_angle in enumerate(array_of_altitude_angles):
+        alpha = alpha_angle.degrees()
         if index < 12:
             continue
         if not found_below_time and alpha < 0:
@@ -32,12 +36,13 @@ def calculate_sun_down_time(array_of_altitude_angles):
             return sun_down_time
         else:
             last_alpha = alpha
+    return 0.0
 
 
 # calculate times in Stillwater, OK -- to demonstrate the effect of longitude not lining up with the std meridian
-longitude = 97.05
-standard_meridian = 90
-latitude = 36.11
+longitude = Angular(degrees=97.05)
+standard_meridian = Angular(degrees=90)
+latitude = Angular(degrees=36.11)
 x = []
 for hour in range(0, 24):
     x.append(hour)
@@ -45,45 +50,45 @@ for hour in range(0, 24):
 alpha0721 = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     dt = datetime(2001, 7, 21, hour, 00, 00)
-    alpha0721.append(altitude_angle(dt, False, longitude, standard_meridian, latitude).degrees)
+    alpha0721.append(altitude_angle(dt, False, longitude, standard_meridian, latitude))
 
 alpha0821 = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     dt = datetime(2001, 8, 21, hour, 00, 00)
-    alpha0821.append(altitude_angle(dt, False, longitude, standard_meridian, latitude).degrees)
+    alpha0821.append(altitude_angle(dt, False, longitude, standard_meridian, latitude))
 
 alpha0921 = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     dt = datetime(2001, 9, 21, hour, 00, 00)
-    alpha0921.append(altitude_angle(dt, False, longitude, standard_meridian, latitude).degrees)
+    alpha0921.append(altitude_angle(dt, False, longitude, standard_meridian, latitude))
 
 alpha1021 = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     dt = datetime(2001, 10, 21, hour, 00, 00)
-    alpha1021.append(altitude_angle(dt, False, longitude, standard_meridian, latitude).degrees)
+    alpha1021.append(altitude_angle(dt, False, longitude, standard_meridian, latitude))
 
 alpha1121 = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     dt = datetime(2001, 11, 21, hour, 00, 00)
-    alpha1121.append(altitude_angle(dt, False, longitude, standard_meridian, latitude).degrees)
+    alpha1121.append(altitude_angle(dt, False, longitude, standard_meridian, latitude))
 
 alpha1207 = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     dt = datetime(2001, 12, 7, hour, 00, 00)
-    alpha1207.append(altitude_angle(dt, False, longitude, standard_meridian, latitude).degrees)
+    alpha1207.append(altitude_angle(dt, False, longitude, standard_meridian, latitude))
 
 alpha1221 = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     dt = datetime(2001, 12, 21, hour, 00, 00)
-    alpha1221.append(altitude_angle(dt, False, longitude, standard_meridian, latitude).degrees)
+    alpha1221.append(altitude_angle(dt, False, longitude, standard_meridian, latitude))
 
-plt.plot(x, alpha0721, 'purple', label='7/21', linewidth=1)
-plt.plot(x, alpha0821, 'blue', label='8/21', linewidth=1)
-plt.plot(x, alpha0921, 'green', label='9/21', linewidth=1)
-plt.plot(x, alpha1021, 'yellow', label='10/21', linewidth=1)
-plt.plot(x, alpha1121, 'orange', label='11/21', linewidth=1)
-plt.plot(x, alpha1207, 'red', label='12/7', linewidth=1)
-plt.plot(x, alpha1221, 'black', label='12/21', linewidth=1)
+plt.plot(x, [x.degrees() for x in alpha0721], 'purple', label='7/21', linewidth=1)
+plt.plot(x, [x.degrees() for x in alpha0821], 'blue', label='8/21', linewidth=1)
+plt.plot(x, [x.degrees() for x in alpha0921], 'green', label='9/21', linewidth=1)
+plt.plot(x, [x.degrees() for x in alpha1021], 'yellow', label='10/21', linewidth=1)
+plt.plot(x, [x.degrees() for x in alpha1121], 'orange', label='11/21', linewidth=1)
+plt.plot(x, [x.degrees() for x in alpha1207], 'red', label='12/7', linewidth=1)
+plt.plot(x, [x.degrees() for x in alpha1221], 'black', label='12/21', linewidth=1)
 plt.xlim([0, 23])
 plt.ylim([0, 90])
 plt.suptitle("Time Values for Stillwater", fontsize=14, fontweight='bold')
@@ -97,21 +102,21 @@ plt.close()
 alpha1207 = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     dt = datetime(2001, 12, 7, hour, 00, 00)
-    alpha1207.append(altitude_angle(dt, False, longitude, standard_meridian, latitude).degrees)
+    alpha1207.append(altitude_angle(dt, False, longitude, standard_meridian, latitude))
 
 alpha1221 = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     dt = datetime(2001, 12, 21, hour, 00, 00)
-    alpha1221.append(altitude_angle(dt, False, longitude, standard_meridian, latitude).degrees)
+    alpha1221.append(altitude_angle(dt, False, longitude, standard_meridian, latitude))
 
 alpha0107 = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     dt = datetime(2001, 1, 7, hour, 00, 00)
-    alpha0107.append(altitude_angle(dt, False, longitude, standard_meridian, latitude).degrees)
+    alpha0107.append(altitude_angle(dt, False, longitude, standard_meridian, latitude))
 
-plt.plot(x, alpha1207, 'orange', label='12/7', linewidth=1)
-plt.plot(x, alpha1221, 'black', label='12/21', linewidth=1)
-plt.plot(x, alpha0107, 'red', label='1/7', linewidth=1)
+plt.plot(x, [x.degrees() for x in alpha1207], 'orange', label='12/7', linewidth=1)
+plt.plot(x, [x.degrees() for x in alpha1221], 'black', label='12/21', linewidth=1)
+plt.plot(x, [x.degrees() for x in alpha0107], 'red', label='1/7', linewidth=1)
 plt.xlim([7, 18])
 plt.ylim([0, 35])
 plt.suptitle("Time Values for Stillwater", fontsize=14, fontweight='bold')

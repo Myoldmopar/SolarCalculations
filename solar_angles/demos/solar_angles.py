@@ -6,9 +6,9 @@ from solar_angles import solar
 import matplotlib.pyplot as plt
 
 # calculate times in Stillwater, OK -- to demonstrate the effect of longitude not lining up with the standard meridian
-longitude = 97.05
-standard_meridian = 90
-latitude = 36.11
+longitude = solar.Angular(degrees=97.05)
+standard_meridian = solar.Angular(degrees=90)
+latitude = solar.Angular(degrees=36.11)
 x = []
 lct = []
 lst = []
@@ -33,15 +33,15 @@ plt.savefig('/tmp/DemoSolarAnglesCivilSolarTime.png')
 plt.close()
 
 # calculate hour angle for a summer day in Golden, CO
-longitude = 105.2
-standard_meridian = 105
-latitude = 39.75
+longitude = solar.Angular(degrees=105.2)
+standard_meridian = solar.Angular(degrees=105)
+latitude = solar.Angular(degrees=39.75)
 x = []
 hours = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     x.append(hour)
     dt = datetime(2001, 6, 21, hour, 00, 00)
-    hours.append(solar.hour_angle(dt, True, longitude, standard_meridian).degrees)
+    hours.append(solar.hour_angle(dt, True, longitude, standard_meridian).degrees())
 
 plt.plot(x, hours, 'b', label='Hour Angle')
 plt.xlim([0, 23])
@@ -56,18 +56,18 @@ plt.savefig('/tmp/DemoSolarAnglesHour.png')
 plt.close()
 
 # calculate solar_angles altitude angles for Winter and Summer days in Golden, CO
-longitude = 105.2
-standard_meridian = 105
-latitude = 39.75
+longitude = solar.Angular(degrees=105.2)
+standard_meridian = solar.Angular(degrees=105)
+latitude = solar.Angular(degrees=39.75)
 x = []
 beta_winter = []
 beta_summer = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     x.append(hour)
     dt = datetime(2001, 12, 21, hour, 00, 00)
-    beta_winter.append(solar.altitude_angle(dt, False, longitude, standard_meridian, latitude).degrees)
+    beta_winter.append(solar.altitude_angle(dt, False, longitude, standard_meridian, latitude).degrees())
     dt = datetime(2001, 6, 21, hour, 00, 00)
-    beta_summer.append(solar.altitude_angle(dt, True, longitude, standard_meridian, latitude).degrees)
+    beta_summer.append(solar.altitude_angle(dt, True, longitude, standard_meridian, latitude).degrees())
 
 plt.plot(x, beta_winter, 'b', label='Winter')
 plt.plot(x, beta_summer, 'r', label='Summer')
@@ -83,15 +83,15 @@ plt.savefig('/tmp/DemoSolarAngles1.png')
 plt.close()
 
 # calculate solar_angles azimuth angle for a summer day in Golden, CO
-longitude = 105.2
-standard_meridian = 105
-latitude = 39.75
+longitude = solar.Angular(degrees=105.2)
+standard_meridian = solar.Angular(degrees=105)
+latitude = solar.Angular(degrees=39.75)
 x = []
 solar_az = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     x.append(hour)
     dt = datetime(2001, 6, 21, hour, 00, 00)
-    solar_az.append(solar.azimuth_angle(dt, True, longitude, standard_meridian, latitude).degrees)
+    solar_az.append(solar.azimuth_angle(dt, True, longitude, standard_meridian, latitude).degrees())
 
 plt.plot(x, solar_az, 'b', label='Solar Azimuth Angle')
 plt.xlim([0, 23])
@@ -106,25 +106,31 @@ plt.savefig('/tmp/DemoSolarAnglesSolarAzimuth.png')
 plt.close()
 
 # calculate wall azimuth angles for a summer day in Golden, CO
-longitude = 105.2
-standard_meridian = 105
-latitude = 39.75
+longitude = solar.Angular(degrees=105.2)
+standard_meridian = solar.Angular(degrees=105)
+latitude = solar.Angular(degrees=39.75)
 x = []
-east_wall_normal_from_north = 90
-east_az = []
-south_wall_normal_from_north = 180
-south_az = []
-west_wall_normal_from_north = 270
-west_az = []
+east_wall_normal_from_north = solar.Angular(degrees=90)
+east_az: list[float] = []
+south_wall_normal_from_north = solar.Angular(degrees=180)
+south_az: list[float] = []
+west_wall_normal_from_north = solar.Angular(degrees=270)
+west_az: list[float] = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     x.append(hour)
     dt = datetime(2001, 6, 21, hour, 00, 00)
     east_az.append(
-        solar.wall_azimuth_angle(dt, True, longitude, standard_meridian, latitude, east_wall_normal_from_north).degrees)
+        solar.wall_azimuth_angle(
+            dt, True, longitude, standard_meridian, latitude, east_wall_normal_from_north
+        ).degrees()
+    )
     south_az.append(solar.wall_azimuth_angle(dt, True, longitude, standard_meridian, latitude,
-                                             south_wall_normal_from_north).degrees)
+                                             south_wall_normal_from_north).degrees())
     west_az.append(
-        solar.wall_azimuth_angle(dt, True, longitude, standard_meridian, latitude, west_wall_normal_from_north).degrees)
+        solar.wall_azimuth_angle(
+            dt, True, longitude, standard_meridian, latitude, west_wall_normal_from_north
+        ).degrees()
+    )
 
 plt.plot(x, east_az, 'r', label='East Wall Azimuth Angle')
 plt.plot(x, south_az, 'g', label='South Wall Azimuth Angle')
@@ -142,22 +148,25 @@ plt.savefig('/tmp/DemoSolarAnglesWallAzimuths.png')
 plt.close()
 
 # calculate solar_angles angle of incidence for a summer day in Golden, CO
-longitude = 105.2
-standard_meridian = 105
-latitude = 39.75
+longitude = solar.Angular(degrees=105.2)
+standard_meridian = solar.Angular(degrees=105)
+latitude = solar.Angular(degrees=39.75)
 x = []
-east_wall_normal_from_north = 90
-east_theta = []
+east_wall_normal_from_north = solar.Angular(degrees=90)
+east_theta: list[float] = []
 east_az = []
-alt = []
+alt: list[float] = []
 for hour in range(0, 24):  # gives zero-based hours as expected in the datetime constructor
     x.append(hour)
     dt = datetime(2001, 6, 21, hour, 00, 00)
     east_az.append(
-        solar.wall_azimuth_angle(dt, True, longitude, standard_meridian, latitude, east_wall_normal_from_north).degrees)
+        solar.wall_azimuth_angle(
+            dt, True, longitude, standard_meridian, latitude, east_wall_normal_from_north
+        ).degrees()
+    )
     east_theta.append(solar.solar_angle_of_incidence(dt, True, longitude, standard_meridian, latitude,
-                                                     east_wall_normal_from_north).degrees)
-    alt.append(solar.altitude_angle(dt, True, longitude, standard_meridian, latitude).degrees)
+                                                     east_wall_normal_from_north).degrees())
+    alt.append(solar.altitude_angle(dt, True, longitude, standard_meridian, latitude).degrees())
 
 plt.plot(x, alt, 'r', label='Solar Altitude Angle')
 plt.plot(x, east_az, 'g', label='East Wall Azimuth Angle')
